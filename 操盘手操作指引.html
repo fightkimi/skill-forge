@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="ClipMind Skill Forge 操盘手四步操作指引">
+  <title>操盘手操作指引｜ClipMind Skill Forge</title>
+  <style>
+    :root{
+      --canvas:#f3efe7;
+      --paper:#fffdf8;
+      --paper-deep:#f3ede3;
+      --ink:#302a25;
+      --ink-2:#514a43;
+      --muted:#746c63;
+      --faint:#9a9288;
+      --line:#d9d0c4;
+      --line-soft:#e9e2d8;
+      --accent:#a44732;
+      --accent-soft:#f3e4dc;
+      --ok:#3f7258;
+      --ok-soft:#e7f0e9;
+      --no:#9b5a32;
+      --no-soft:#f4e9df;
+      --content-width:880px;
+      --font-display:"Source Han Serif SC","Songti SC","STSong",serif;
+      --font-body:"Source Han Sans SC","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif;
+      --font-code:"SFMono-Regular","Cascadia Code",Menlo,monospace;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--canvas);color:var(--ink);font:400 16px/1.75 var(--font-body);-webkit-font-smoothing:antialiased}
+    body::before{content:"";position:fixed;inset:0 0 auto;height:5px;background:var(--accent);z-index:300}
+    ::selection{background:var(--accent-soft)}
+    a{color:inherit;text-decoration-color:var(--line);text-underline-offset:4px}
+    button{font:inherit}
+    .skip{position:fixed;top:10px;left:10px;z-index:500;transform:translateY(-160%);padding:10px 14px;border:1px solid var(--ink);background:var(--paper);color:var(--ink)}
+    .skip:focus{transform:translateY(0)}
+    .reading-progress{position:fixed;top:0;left:0;z-index:400;width:0;height:5px;background:#4e7089}
+    .tools{position:fixed;right:20px;top:20px;z-index:240;display:flex;gap:8px;padding:6px;border:1px solid var(--line);background:rgba(255,253,248,.94);box-shadow:0 10px 28px rgba(45,38,32,.08)}
+    .tool{min-height:38px;padding:7px 11px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:.76rem;font-weight:700;cursor:pointer}
+    .tool:hover,.tool:focus-visible{border-color:var(--line);color:var(--ink);outline:none}
+    .shell{display:grid;grid-template-columns:174px minmax(0,var(--content-width));gap:54px;width:min(calc(100% - 64px),1108px);margin:0 auto;align-items:start}
+    .rail{position:sticky;top:0;height:100vh;padding:66px 0 40px;overflow:auto;scrollbar-width:none}
+    .rail::-webkit-scrollbar{display:none}
+    .rail-project{color:var(--accent);font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    .rail-title{margin-top:18px;font-family:var(--font-display);font-size:1.5rem;font-weight:800;line-height:1.28}
+    .rail-note{margin-top:10px;color:var(--muted);font-size:.72rem;line-height:1.6}
+    .nav{display:grid;gap:3px;margin:32px 0 0;padding:0;border-top:1px solid var(--line);list-style:none}
+    .nav a{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;padding:11px 4px;border-bottom:1px solid var(--line-soft);color:var(--muted);font-size:.73rem;line-height:1.38;text-decoration:none}
+    .nav-index{color:var(--faint);font:700 .64rem/1.5 var(--font-code)}
+    .nav a:hover,.nav a.active{color:var(--accent)}
+    .rail-tip{margin-top:28px;padding-top:15px;border-top:1px solid var(--line);color:var(--muted);font-size:.7rem;line-height:1.65}
+    .document{width:100%;max-width:var(--content-width);padding:74px 0 130px}
+    .hero{padding:34px 0 58px;border-bottom:1px solid var(--line)}
+    .kicker{color:var(--accent);font-size:.7rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+    .hero h1{margin:22px 0 0;font-family:var(--font-display);font-size:clamp(3rem,5vw,4.35rem);font-weight:850;line-height:1.06;letter-spacing:-.05em;text-wrap:balance}
+    .hero-subtitle{margin:26px 0 0;max-width:760px;color:var(--ink-2);font-size:1.04rem;line-height:1.8}
+    .hero-rule{display:grid;grid-template-columns:110px 1fr;gap:18px;margin-top:30px;padding:20px 22px;border:1px solid var(--line);background:var(--accent-soft)}
+    .hero-rule-label{color:var(--accent);font:800 .66rem/1.5 var(--font-code);letter-spacing:.08em;text-transform:uppercase}
+    .hero-rule strong{display:block;font-size:1.02rem;line-height:1.7}
+    .overview{padding:48px 0 64px}
+    .overview-label{color:var(--faint);font-size:.66rem;font-weight:750;letter-spacing:.14em;text-transform:uppercase}
+    .overview-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:18px;border-block:1px solid var(--line)}
+    .overview-item{padding:20px 16px 22px;border-inline-start:1px solid var(--line)}
+    .overview-item:first-child{border-inline-start:0}
+    .overview-n{color:var(--accent);font:800 .66rem/1 var(--font-code)}
+    .overview-kind{margin-top:10px;font-family:var(--font-display);font-size:1.18rem;font-weight:820}
+    .overview-desc{margin-top:6px;color:var(--muted);font-size:.74rem;line-height:1.58}
+    .section{padding:64px 0 72px;border-top:1px solid var(--line);scroll-margin-top:24px}
+    .section-head{display:grid;grid-template-columns:62px minmax(0,1fr);gap:18px;align-items:start;margin-bottom:34px}
+    .chapter-index{padding-top:7px;color:var(--faint);font:700 .72rem/1 var(--font-code);letter-spacing:.08em}
+    .chapter-label{color:var(--accent);font-size:.63rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    .section h2{margin:8px 0 0;font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:820;line-height:1.12;letter-spacing:-.03em;text-wrap:balance}
+    .lead{max-width:760px;margin:0 0 24px;color:var(--ink-2);font-size:1rem;line-height:1.8}
+    .step-box{margin:24px 0;padding:24px;border:1px solid var(--line);background:var(--paper)}
+    .step-box h3{margin:0 0 8px;font-family:var(--font-display);font-size:1.35rem;line-height:1.35}
+    .step-box p{margin:0;color:var(--muted)}
+    .path{display:block;margin-top:16px;padding:15px 17px;border:1px solid var(--line);background:var(--paper-deep);color:var(--ink);font:700 .84rem/1.6 var(--font-code);word-break:break-all}
+    .plain-list{display:grid;gap:9px;margin:22px 0 0;padding:0;list-style:none}
+    .plain-list li{display:grid;grid-template-columns:26px 1fr;gap:8px;color:var(--ink-2)}
+    .plain-list li::before{content:"✓";color:var(--ok);font-weight:900}
+    .command{position:relative;margin:24px 0;padding:22px 118px 22px 22px;border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--paper);color:var(--ink);font-weight:700;line-height:1.75}
+    .copy{position:absolute;right:14px;top:14px;padding:8px 11px;border:1px solid var(--line);background:var(--paper-deep);color:var(--muted);font-size:.72rem;font-weight:750;cursor:pointer}
+    .copy:hover,.copy:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+    .result{padding:22px;border:1px solid var(--line);border-top:4px solid}
+    .result.ok{border-top-color:var(--ok);background:var(--ok-soft)}
+    .result.no{border-top-color:var(--no);background:var(--no-soft)}
+    .result-label{font-size:.66rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .result.ok .result-label{color:var(--ok)}
+    .result.no .result-label{color:var(--no)}
+    .result h3{margin:11px 0 7px;font-family:var(--font-display);font-size:1.32rem}
+    .result p{margin:0;color:var(--ink-2);font-size:.86rem}
+    .example{margin:25px 0 0;padding:20px 22px;border:1px solid var(--line);background:var(--paper)}
+    .example-title{color:var(--faint);font-size:.66rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .example p{margin:10px 0 0;color:var(--ink);font-weight:650}
+    .flow{display:grid;grid-template-columns:repeat(7,auto);align-items:center;justify-content:space-between;gap:8px;margin:28px 0;padding:24px;border-block:1px solid var(--line);background:var(--paper)}
+    .flow-node{min-width:92px;padding:13px 10px;border:1px solid var(--line);background:var(--paper-deep);font-size:.78rem;font-weight:750;text-align:center}
+    .flow-arrow{color:var(--faint);font:700 .8rem/1 var(--font-code)}
+    .boundary{margin-top:30px;padding:20px 22px;border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--accent-soft)}
+    .boundary h3{margin:0 0 8px;font-size:1rem}
+    .boundary p{margin:0;color:var(--ink-2);font-size:.85rem}
+    .faq{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+    .faq-item{padding:20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper)}
+    .faq-item h3{margin:0 0 7px;font-size:.95rem}
+    .faq-item p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.68}
+    .final{padding:54px 0 18px;border-top:1px solid var(--line);text-align:center}
+    .final .kicker{margin-bottom:10px}
+    .final h2{margin:0;font-family:var(--font-display);font-size:2rem}
+    .final p{margin:12px auto 0;max-width:600px;color:var(--muted)}
+    .toast{position:fixed;left:50%;bottom:24px;z-index:600;transform:translate(-50%,18px);padding:10px 14px;background:var(--ink);color:var(--paper);font-size:.76rem;opacity:0;pointer-events:none;transition:.2s ease}
+    .toast.show{transform:translate(-50%,0);opacity:1}
+    @media(max-width:960px){.shell{grid-template-columns:150px minmax(0,var(--content-width));gap:34px;width:min(calc(100% - 46px),1060px)}}
+    @media(max-width:820px){
+      .shell{display:block;width:min(calc(100% - 36px),var(--content-width))}.rail{position:relative;height:auto;padding:40px 0 20px;border-bottom:1px solid var(--line)}
+      .rail-title,.rail-note,.rail-tip{display:none}.nav{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:18px}.nav a{display:block;padding:9px 5px;border-inline-start:1px solid var(--line);font-size:.65rem;text-align:center}.nav li:first-child a{border-inline-start:0}.nav-index{display:block;margin-bottom:3px}
+      .document{padding-top:38px}.hero h1{font-size:clamp(2.7rem,9vw,4rem)}.tools{top:auto;right:12px;bottom:12px}
+    }
+    @media(max-width:620px){
+      body{font-size:15px}.shell{width:min(calc(100% - 28px),var(--content-width))}.hero{padding-top:20px}.hero h1{font-size:clamp(2.2rem,11vw,3.15rem)}
+      .hero-rule{grid-template-columns:1fr;gap:7px}.overview-grid{grid-template-columns:1fr 1fr}.overview-item:nth-child(3){border-inline-start:0}.overview-item:nth-child(n+3){border-top:1px solid var(--line)}
+      .section{padding-block:52px}.section-head{grid-template-columns:1fr;gap:8px}.chapter-index{padding:0}.section h2{font-size:clamp(1.9rem,9vw,2.55rem)}
+      .command{padding:20px 20px 64px}.copy{right:14px;top:auto;bottom:14px}.result-grid,.faq{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.flow-arrow{transform:rotate(90deg);text-align:center}.tools{left:10px}.tool{flex:1;min-height:44px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toast{transition:none}}
+    @media print{@page{size:A4;margin:14mm}body{background:var(--paper);font-size:10.5pt}body::before,.rail,.tools,.reading-progress,.skip,.copy,.toast{display:none!important}.shell{display:block;width:100%}.document{max-width:none;padding:0}.section{break-before:page;padding-block:18mm 0}.hero{min-height:245mm;display:grid;align-content:center;page-break-after:always}.result,.step-box,.boundary{break-inside:avoid}}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#document">跳到正文</a>
+  <div class="reading-progress" id="progress"></div>
+  <div class="tools" aria-label="文档工具">
+    <button class="tool" type="button" data-copy="first-command">复制开始口令</button>
+    <button class="tool" id="printBtn" type="button">打印 / PDF</button>
+  </div>
+
+  <div class="shell">
+    <aside class="rail" aria-label="操作导航">
+      <div class="rail-project">ClipMind · Skill Forge</div>
+      <div class="rail-title">操盘手<br>操作指引</div>
+      <div class="rail-note">一个 IP，一次一个 Skill。<br>只需要反馈内容好不好。</div>
+      <nav>
+        <ol class="nav" id="nav">
+          <li><a href="#step-1"><span class="nav-index">01</span><span>放入材料</span></a></li>
+          <li><a href="#step-2"><span class="nav-index">02</span><span>开始调试</span></a></li>
+          <li><a href="#step-3"><span class="nav-index">03</span><span>反馈修改</span></a></li>
+          <li><a href="#step-4"><span class="nav-index">04</span><span>完成下一个</span></a></li>
+        </ol>
+      </nav>
+      <div class="rail-tip"><strong>不用做：</strong><br>不用安装 146 个 Skill<br>不用记技术 ID<br>不用改代码</div>
+    </aside>
+
+    <main class="document" id="document">
+      <header class="hero" id="top">
+        <div class="kicker">Quick Start · 简单操作指南</div>
+        <h1>调 Skill，<br>只做四件事</h1>
+        <p class="hero-subtitle">把一个 IP 的材料放进去，Codex 会按顺序一次调一个 Skill。你只需要看结果，然后告诉它“OK”或“哪里不OK”。</p>
+        <div class="hero-rule">
+          <div class="hero-rule-label">唯一规则</div>
+          <strong>每个 Skill 单独开一个 Codex 对话；全程只使用同一套 IP 材料。</strong>
+        </div>
+      </header>
+
+      <section class="overview" aria-label="四步总览">
+        <div class="overview-label">四步完成一次调试</div>
+        <div class="overview-grid">
+          <div class="overview-item"><div class="overview-n">01</div><div class="overview-kind">放材料</div><div class="overview-desc">把当前 IP 的原始资料放进指定文件夹。</div></div>
+          <div class="overview-item"><div class="overview-n">02</div><div class="overview-kind">开对话</div><div class="overview-desc">复制一句开始口令，Codex 自动找 Skill。</div></div>
+          <div class="overview-item"><div class="overview-n">03</div><div class="overview-kind">给反馈</div><div class="overview-desc">只说结果哪里好、哪里不对。</div></div>
+          <div class="overview-item"><div class="overview-n">04</div><div class="overview-kind">确认完成</div><div class="overview-desc">确认 OK，拿到最终 Skill，再开下一个。</div></div>
+        </div>
+      </section>
+
+      <section class="section" id="step-1">
+        <div class="section-head"><div class="chapter-index">01 / 04</div><div><div class="chapter-label">Prepare</div><h2>把 IP 材料放进去</h2></div></div>
+        <p class="lead">打开项目后，只需要找到下面这个文件夹，把当前 IP 的材料全部放进去。</p>
+        <div class="step-box">
+          <h3>材料放这里</h3>
+          <span class="path">IP素材库 / 原始材料 /</span>
+          <ul class="plain-list">
+            <li>访谈记录、IP 介绍、产品资料、历史内容都可以。</li>
+            <li>文档、表格、图片、音视频和转写文本都可以。</li>
+            <li>保留原文件，不用提前整理或润色。</li>
+          </ul>
+        </div>
+        <div class="boundary"><h3>一个项目只放一个 IP</h3><p>要换另一个 IP，请复制一份新项目。不要把两个客户的材料混在同一个素材库里。</p></div>
+      </section>
+
+      <section class="section" id="step-2">
+        <div class="section-head"><div class="chapter-index">02 / 04</div><div><div class="chapter-label">Start</div><h2>新建对话，复制一句话</h2></div></div>
+        <p class="lead">用 Codex 打开整个项目，新建一个对话，把下面这句话发出去。Codex 会先整理 IP 档案，再自动开始第一个 Skill。</p>
+        <div class="command" id="first-command">请阅读《开始调试.md》，帮我完成 IP 建档并开始第一个 Skill。<button class="copy" type="button" data-copy="first-command">复制这句话</button></div>
+        <ul class="plain-list">
+          <li>不用选择 Skill。</li>
+          <li>不用复制技术 ID。</li>
+          <li>不用告诉 Codex 调试顺序。</li>
+        </ul>
+      </section>
+
+      <section class="section" id="step-3">
+        <div class="section-head"><div class="chapter-index">03 / 04</div><div><div class="chapter-label">Feedback</div><h2>看结果，只回复 OK 或不OK</h2></div></div>
+        <p class="lead">Codex 输出内容后，会给你两个选项。你只需要判断内容是否达到业务预期。</p>
+        <div class="result-grid">
+          <article class="result ok">
+            <div class="result-label">结果符合预期</div>
+            <h3>OK，完成这个 Skill</h3>
+            <p>Codex 会做最后校验，并输出最终校正好的 Skill。</p>
+          </article>
+          <article class="result no">
+            <div class="result-label">结果还不满意</div>
+            <h3>不OK：直接说问题</h3>
+            <p>Codex 会只改反馈涉及的部分，再用同一份材料重新生成。</p>
+          </article>
+        </div>
+        <div class="example"><div class="example-title">反馈示例</div><p>不OK：开头太慢，前三句话没有抓住目标用户；第二部分是对的，请保留。</p></div>
+        <div class="boundary"><h3>你只管内容，不用判断哪些 Prompt 能改</h3><p>Codex 会自动区分“当前 IP 个案”“可写进通用 Skill 的方法”和“不能修改的平台契约”。输入输出字段、工具权限、人工确认和安全护栏不会被改动。</p></div>
+      </section>
+
+      <section class="section" id="step-4">
+        <div class="section-head"><div class="chapter-index">04 / 04</div><div><div class="chapter-label">Finish</div><h2>确认完成，再开下一个对话</h2></div></div>
+        <p class="lead">你回复 OK 后，Codex 会输出最终 Skill、修改前后差异和校验结果。当前 Skill 到这里结束。</p>
+        <div class="flow" aria-label="完整调试流程">
+          <div class="flow-node">看结果</div><div class="flow-arrow">→</div>
+          <div class="flow-node">不OK反馈</div><div class="flow-arrow">→</div>
+          <div class="flow-node">校正复跑</div><div class="flow-arrow">→</div>
+          <div class="flow-node">确认 OK</div>
+        </div>
+        <p class="lead">然后关闭当前对话，新建一个 Codex 对话，发送：</p>
+        <div class="command" id="next-command">开始调试下一个 Skill<button class="copy" type="button" data-copy="next-command">复制这句话</button></div>
+        <div class="boundary"><h3>不要在原对话继续调下一个</h3><p>一个 Skill 对应一个对话，方便保留清楚的反馈和修改记录。新对话会自动读取本地进度，不会从头再来。</p></div>
+      </section>
+
+      <section class="section" id="faq">
+        <div class="section-head"><div class="chapter-index">FAQ</div><div><div class="chapter-label">Questions</div><h2>常见问题</h2></div></div>
+        <div class="faq">
+          <article class="faq-item"><h3>需要自己挑 Skill 吗？</h3><p>不需要。Codex 会按 ClipMind 业务顺序自动找下一项。</p></article>
+          <article class="faq-item"><h3>反馈后要再说“修改 Skill”吗？</h3><p>不需要。回复“不OK：修改意见”就代表允许它校正当前 Skill。</p></article>
+          <article class="faq-item"><h3>材料会提交到 GitHub 吗？</h3><p>不会。素材、IP 档案、调试记录和回收包默认都被忽略。</p></article>
+          <article class="faq-item"><h3>确认 OK 后会直接上线吗？</h3><p>不会。最终 Skill 仍需开发按来源映射复测并人工合入 ClipMind。</p></article>
+        </div>
+      </section>
+
+      <footer class="final">
+        <div class="kicker">That’s all</div>
+        <h2>放材料 → 开对话 → 给反馈 → 确认 OK</h2>
+        <p>操盘手只负责判断内容质量，其他步骤交给 Codex。</p>
+      </footer>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">已复制</div>
+  <script>
+    (function(){
+      "use strict";
+      var progress=document.getElementById("progress");
+      function updateProgress(){
+        var max=document.documentElement.scrollHeight-window.innerHeight;
+        progress.style.width=(max>0?window.scrollY/max*100:0)+"%";
+      }
+      window.addEventListener("scroll",updateProgress,{passive:true});
+      updateProgress();
+
+      var navLinks=[].slice.call(document.querySelectorAll(".nav a"));
+      var sections=[].slice.call(document.querySelectorAll(".section[id^='step-']"));
+      if("IntersectionObserver" in window){
+        var observer=new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(!entry.isIntersecting)return;
+            navLinks.forEach(function(link){link.classList.remove("active")});
+            var active=document.querySelector('.nav a[href="#'+entry.target.id+'"]');
+            if(active)active.classList.add("active");
+          });
+        },{rootMargin:"-20% 0px -70% 0px",threshold:0});
+        sections.forEach(function(section){observer.observe(section)});
+      }
+
+      var toast=document.getElementById("toast"),timer;
+      function showToast(){
+        clearTimeout(timer);toast.classList.add("show");
+        timer=setTimeout(function(){toast.classList.remove("show")},1600);
+      }
+      document.querySelectorAll("[data-copy]").forEach(function(button){
+        button.addEventListener("click",function(){
+          var target=document.getElementById(button.getAttribute("data-copy"));
+          if(!target)return;
+          var clone=target.cloneNode(true);
+          clone.querySelectorAll("button").forEach(function(node){node.remove()});
+          var text=clone.textContent.trim();
+          if(navigator.clipboard&&window.isSecureContext){
+            navigator.clipboard.writeText(text).then(showToast);
+          }else{
+            var area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();document.execCommand("copy");area.remove();showToast();
+          }
+        });
+      });
+      document.getElementById("printBtn").addEventListener("click",function(){window.print()});
+    }());
+  </script>
+</body>
+</html>
