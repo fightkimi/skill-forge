@@ -1,0 +1,21 @@
+# 当前 IP 的私有材料与建档结果
+IP素材库/原始材料/*
+!IP素材库/原始材料/.gitkeep
+IP素材库/PROFILE.md
+IP素材库/MATERIALS.md
+IP素材库/EVIDENCE-INDEX.md
+IP素材库/操盘手补充确认.md
+IP素材库/outputs/
+
+# 本地进度、调试历史与回收包
+.skill-forge/*
+!.skill-forge/README.md
+tuning-records/*
+!tuning-records/README.md
+merge-packages/*
+!merge-packages/README.md
+
+# 本地运行缓存
+__pycache__/
+*.pyc
+.DS_Store

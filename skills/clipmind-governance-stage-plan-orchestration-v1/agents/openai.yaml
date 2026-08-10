@@ -1,0 +1,6 @@
+interface:
+  display_name: "阶段式内容计划编排"
+  short_description: "用于阶段式内容计划编排，支持基于当前IP材料独立生成、分析、检查与调优"
+  default_prompt: "使用 $clipmind-governance-stage-plan-orchestration-v1，基于当前 IP 案例执行“阶段式内容计划编排”。"
+policy:
+  allow_implicit_invocation: false

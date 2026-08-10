@@ -1,0 +1,6 @@
+interface:
+  display_name: "低成本下一步交付"
+  short_description: "用于低成本下一步交付，支持基于当前IP材料独立生成、分析、检查与调优"
+  default_prompt: "使用 $clipmind-sop-core-s06-ondemand-low-effort-handoff，基于当前 IP 案例执行“低成本下一步交付”。"
+policy:
+  allow_implicit_invocation: false

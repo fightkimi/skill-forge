@@ -1,0 +1,6 @@
+interface:
+  display_name: "策略草案综合"
+  short_description: "用于策略草案综合，支持基于当前IP材料独立生成、分析、检查与调优"
+  default_prompt: "使用 $clipmind-governance-strategy-synthesis-v1，基于当前 IP 案例执行“策略草案综合”。"
+policy:
+  allow_implicit_invocation: false

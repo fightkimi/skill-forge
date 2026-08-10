@@ -1,0 +1,6 @@
+interface:
+  display_name: "当前 IP 上下文路由"
+  short_description: "用于当前 IP 上下文路由，支持基于当前IP材料独立生成、分析、检查与调优"
+  default_prompt: "使用 $clipmind-governance-current-ip-context-routing-v1，基于当前 IP 案例执行“当前 IP 上下文路由”。"
+policy:
+  allow_implicit_invocation: false

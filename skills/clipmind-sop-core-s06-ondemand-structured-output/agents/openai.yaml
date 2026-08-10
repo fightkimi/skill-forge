@@ -1,0 +1,6 @@
+interface:
+  display_name: "结构化输出规范"
+  short_description: "用于结构化输出规范，支持基于当前IP材料独立生成、分析、检查与调优"
+  default_prompt: "使用 $clipmind-sop-core-s06-ondemand-structured-output，基于当前 IP 案例执行“结构化输出规范”。"
+policy:
+  allow_implicit_invocation: false
