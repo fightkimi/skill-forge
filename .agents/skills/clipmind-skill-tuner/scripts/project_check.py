@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 from collections import Counter
 from pathlib import Path
@@ -75,6 +76,31 @@ def check_builtin_fixture(root: Path, queue_ids: set[str]) -> list[str]:
     return errors
 
 
+def check_baseline_locks(root: Path, queue_ids: set[str]) -> list[str]:
+    errors: list[str] = []
+    locks_path = root / "inventory/baseline-locks.json"
+    if not locks_path.exists():
+        return ["缺少 inventory/baseline-locks.json 原始基线锁"]
+    try:
+        lock_data = json.loads(locks_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"原始基线锁无法解析：{exc}"]
+    if lock_data.get("algorithm") != "sha256":
+        errors.append("原始基线锁算法必须为 sha256")
+    locks = lock_data.get("skills", {})
+    if set(locks) != queue_ids:
+        errors.append("原始基线锁与 32 个操盘手文案 Skill 不一致")
+    for skill_id in queue_ids:
+        original_path = root / "skills" / skill_id / "references/original.md"
+        if not original_path.exists():
+            errors.append(f"{skill_id} 缺少 references/original.md 原始基线")
+            continue
+        actual = hashlib.sha256(original_path.read_bytes()).hexdigest()
+        if locks.get(skill_id) != actual:
+            errors.append(f"{skill_id} 的原始基线与锁定哈希不一致")
+    return errors
+
+
 def run_checks(root: Path) -> list[str]:
     errors: list[str] = []
     inventory_path = root / "inventory/skills.json"
@@ -103,6 +129,7 @@ def run_checks(root: Path) -> list[str]:
     if not order_ids.isdisjoint(optional_ids):
         errors.append("默认调试队列与按需文案清单发生重叠")
     errors.extend(check_builtin_fixture(root, order_ids))
+    errors.extend(check_baseline_locks(root, order_ids))
 
     for item in inventory:
         skill_id = item["技术ID"]

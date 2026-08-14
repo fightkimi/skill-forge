@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 import shutil
 import sys
@@ -34,6 +35,34 @@ class ProjectCheckTest(unittest.TestCase):
                 (temp_root / "fixtures/ip/赵玥玥/scenarios.json").unlink()
                 errors = module.check_builtin_fixture(temp_root, {"skill-a"})
                 self.assertTrue(any("scenarios.json" in error for error in errors), errors)
+        finally:
+            sys.path.remove(str(SCRIPTS))
+
+    def test_project_check_detects_baseline_drift(self):
+        module = self.load_project_check()
+        try:
+            self.assertTrue(hasattr(module, "check_baseline_locks"))
+            skill_id = "clipmind-agent-xhs-graphic-note"
+            source = ROOT / "skills" / skill_id / "references/original.md"
+            expected = hashlib.sha256(source.read_bytes()).hexdigest()
+            with tempfile.TemporaryDirectory(prefix="skill-lock-check-") as temp:
+                temp_root = Path(temp)
+                original = temp_root / "skills" / skill_id / "references/original.md"
+                original.parent.mkdir(parents=True)
+                original.write_text(
+                    source.read_text(encoding="utf-8") + "\n基线漂移",
+                    encoding="utf-8",
+                )
+                inventory = temp_root / "inventory"
+                inventory.mkdir()
+                (inventory / "baseline-locks.json").write_text(
+                    json.dumps({"algorithm": "sha256", "skills": {skill_id: expected}}),
+                    encoding="utf-8",
+                )
+
+                errors = module.check_baseline_locks(temp_root, {skill_id})
+
+                self.assertTrue(any("原始基线" in error for error in errors), errors)
         finally:
             sys.path.remove(str(SCRIPTS))
 
