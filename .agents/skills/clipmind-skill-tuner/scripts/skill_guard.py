@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 
 START = "<!-- CLIPMIND_DEFINITION_START -->"
@@ -19,6 +20,7 @@ JSON_FENCE_RE = re.compile(r"```json\s*\n(.*?)\n```", re.DOTALL)
 VARIABLE_RE = re.compile(r"\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}")
 RISKY_ACTION_RE = re.compile(r"自动(?:发布|评论|投放|发送|写入|保存)|改变(?:业务)?状态|直接(?:发布|投放|写库)")
 SAFE_QUALIFIERS = ("不得", "不要", "禁止", "不能", "不可", "仅", "只", "等待人工", "人工确认")
+COPY_ONLY_VISUAL_MARKERS = ("画面", "图片", "截图", "版式", "配图", "构图", "颜色", "字体", "留白", "视觉")
 
 
 class ValidationResult:
@@ -115,6 +117,45 @@ def added_lines(original: str, candidate: str) -> list[str]:
     for line, count in (revised - baseline).items():
         added.extend([line] * count)
     return added
+
+
+def marked_lines(text: str, markers: tuple[str, ...]) -> Counter[str]:
+    return Counter(
+        line.strip()
+        for line in text.splitlines()
+        if line.strip() and any(marker in line for marker in markers)
+    )
+
+
+def validate_operator_scope(
+    skill_dir: Path,
+    project_root: Optional[Path],
+    original: str,
+    errors: list[str],
+) -> None:
+    if project_root is None:
+        errors.append("缺少 Skill Forge 项目根目录，无法执行操盘手调优范围检查")
+        return
+    queue_path = project_root / "inventory/tuning-order.json"
+    locks_path = project_root / "inventory/baseline-locks.json"
+    if not queue_path.exists() or not locks_path.exists():
+        errors.append("缺少操盘手调试队列或原始基线锁")
+        return
+
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))["skills"]
+    queue_ids = {item["skill_id"] for item in queue}
+    skill_id = skill_dir.name
+    if skill_id not in queue_ids:
+        errors.append("当前 Skill 不在 32 个默认文案调试队列中，操盘手不得直接调优或打包")
+        return
+
+    lock_data = json.loads(locks_path.read_text(encoding="utf-8"))
+    expected_hash = lock_data.get("skills", {}).get(skill_id)
+    actual_hash = hashlib.sha256(original.encode("utf-8")).hexdigest()
+    if not expected_hash:
+        errors.append("当前 Skill 缺少原始基线锁")
+    elif actual_hash != expected_hash:
+        errors.append("references/original.md 原始基线与锁定版本不一致，禁止继续调优")
 
 
 def validate_no_new_external_actions(original: str, candidate: str, errors: list[str]) -> None:
@@ -233,7 +274,11 @@ def validate_image(original: str, candidate: str, errors: list[str]) -> None:
         errors.append("生图 Prompt 必须保留原有 {subject} 变量")
 
 
-def validate_skill_dir(skill_dir: Path) -> ValidationResult:
+def validate_skill_dir(
+    skill_dir: Path,
+    project_root: Optional[Path] = None,
+    enforce_operator_scope: bool = False,
+) -> ValidationResult:
     skill_dir = Path(skill_dir)
     candidate_path = skill_dir / "SKILL.md"
     original_path = skill_dir / "references/original.md"
@@ -244,6 +289,8 @@ def validate_skill_dir(skill_dir: Path) -> ValidationResult:
     original = original_path.read_text(encoding="utf-8")
     candidate = candidate_path.read_text(encoding="utf-8")
     skill_id = skill_dir.name
+    if enforce_operator_scope:
+        validate_operator_scope(skill_dir, project_root, original, errors)
 
     if skill_id.startswith("clipmind-governance-"):
         if candidate != original:
@@ -256,6 +303,12 @@ def validate_skill_dir(skill_dir: Path) -> ValidationResult:
 
     if skill_id.startswith("clipmind-agent-"):
         validate_agent(original_definition, candidate_definition, errors)
+        if (
+            skill_id == "clipmind-agent-xhs-graphic-note"
+            and marked_lines(original_definition, COPY_ONLY_VISUAL_MARKERS)
+            != marked_lines(candidate_definition, COPY_ONLY_VISUAL_MARKERS)
+        ):
+            errors.append("小红书图文 Skill 的视觉方法属于冻结结构；操盘手只能调整文字判断与表达")
     elif skill_id.startswith("clipmind-sop-"):
         validate_sop(original_definition, candidate_definition, errors)
     elif skill_id.startswith("clipmind-image-"):
@@ -269,7 +322,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="检查 Skill 调优是否越过 ClipMind 平台契约")
     parser.add_argument("skill_dir", type=Path)
     args = parser.parse_args()
-    result = validate_skill_dir(args.skill_dir)
+    root = Path(__file__).resolve().parents[4]
+    result = validate_skill_dir(
+        args.skill_dir,
+        project_root=root,
+        enforce_operator_scope=True,
+    )
     if result.ok:
         print("PASS：改动位于允许调优范围，平台契约未发现变化。")
         return 0

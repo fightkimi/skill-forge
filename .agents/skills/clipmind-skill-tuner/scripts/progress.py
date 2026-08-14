@@ -5,10 +5,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
+
+
+BUILTIN_FIXTURE_ID = "zhao-yueyue"
+BUILTIN_FIXTURE_DIR = Path("fixtures/ip/赵玥玥")
+PROFILE_FILES = ("PROFILE.md", "MATERIALS.md", "EVIDENCE-INDEX.md")
 
 
 def now() -> str:
@@ -20,20 +26,76 @@ def load_order(path: Path) -> list[dict[str, Any]]:
     return data["skills"] if isinstance(data, dict) else data
 
 
-def load_or_initialize(state_path: Path, order: list[dict[str, Any]]) -> dict[str, Any]:
-    if state_path.exists():
-        return json.loads(state_path.read_text(encoding="utf-8"))
-    state = {
-        "version": 1,
-        "ip_profile_status": "not_ready",
-        "active_skill": None,
-        "created_at": now(),
-        "updated_at": now(),
-        "skills": {
-            item["skill_id"]: {"status": "pending", "rounds": 0, "completed_at": None}
-            for item in order
-        },
+def material_library_has_user_content(root: Path) -> bool:
+    library = root / "IP素材库"
+    if any((library / name).exists() for name in PROFILE_FILES):
+        return True
+    raw_materials = library / "原始材料"
+    if not raw_materials.exists():
+        return False
+    return any(path.name != ".gitkeep" for path in raw_materials.iterdir())
+
+
+def seed_builtin_fixture(root: Path) -> bool:
+    fixture = root / BUILTIN_FIXTURE_DIR
+    library = root / "IP素材库"
+    if material_library_has_user_content(root):
+        return False
+    missing = [name for name in PROFILE_FILES if not (fixture / name).exists()]
+    if missing or not (fixture / "原始材料").exists():
+        raise FileNotFoundError(f"内置赵玥玥演练资料不完整：{', '.join(missing) or '原始材料'}")
+
+    library.mkdir(parents=True, exist_ok=True)
+    raw_target = library / "原始材料"
+    raw_target.mkdir(parents=True, exist_ok=True)
+    for name in PROFILE_FILES:
+        shutil.copy2(fixture / name, library / name)
+    for source in (fixture / "原始材料").iterdir():
+        if source.is_file():
+            shutil.copy2(source, raw_target / source.name)
+    return True
+
+
+def reconcile_state(state: dict[str, Any], order: list[dict[str, Any]]) -> None:
+    previous = state.get("skills", {})
+    allowed_ids = [item["skill_id"] for item in order]
+    state["skills"] = {
+        skill_id: previous.get(
+            skill_id,
+            {"status": "pending", "rounds": 0, "completed_at": None},
+        )
+        for skill_id in allowed_ids
     }
+    if state.get("active_skill") not in set(allowed_ids):
+        state["active_skill"] = None
+
+
+def load_or_initialize(
+    state_path: Path,
+    order: list[dict[str, Any]],
+    project_root: Optional[Path] = None,
+) -> dict[str, Any]:
+    if state_path.exists():
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    else:
+        state = {
+            "version": 2,
+            "ip_profile_status": "not_ready",
+            "profile_mode": "unconfigured",
+            "active_ip_fixture": None,
+            "active_skill": None,
+            "created_at": now(),
+            "updated_at": now(),
+            "skills": {},
+        }
+
+    reconcile_state(state, order)
+    state.setdefault("profile_mode", "unconfigured")
+    state.setdefault("active_ip_fixture", None)
+    if project_root is not None and seed_builtin_fixture(project_root):
+        state["ip_profile_status"] = "ready"
+        state["profile_mode"] = "builtin_fixture"
+        state["active_ip_fixture"] = BUILTIN_FIXTURE_ID
     save_state(state_path, state)
     return state
 
@@ -98,10 +160,13 @@ def main() -> int:
     args = parser.parse_args()
 
     order = load_order(args.order)
-    state = load_or_initialize(args.state, order)
+    state = load_or_initialize(args.state, order, project_root=root)
     try:
         if args.command == "profile-ready":
             state["ip_profile_status"] = "ready"
+            if state.get("profile_mode") != "builtin_fixture":
+                state["profile_mode"] = "user_material"
+                state["active_ip_fixture"] = None
             save_state(args.state, state)
         elif args.command == "start":
             if not args.skill_id:

@@ -1,4 +1,5 @@
 import importlib.util
+import inspect
 import shutil
 import tempfile
 import unittest
@@ -36,6 +37,74 @@ class SkillGuardTest(unittest.TestCase):
 
     def validate(self, skill_dir: Path):
         return self.guard.validate_skill_dir(skill_dir)
+
+    def validate_operator(self, skill_dir: Path):
+        parameters = inspect.signature(self.guard.validate_skill_dir).parameters
+        self.assertIn("project_root", parameters)
+        self.assertIn("enforce_operator_scope", parameters)
+        return self.guard.validate_skill_dir(
+            skill_dir,
+            project_root=ROOT,
+            enforce_operator_scope=True,
+        )
+
+    def test_queued_skill_passes_operator_scope(self):
+        skill = self.copy_skill("clipmind-agent-xhs-graphic-note")
+        result = self.validate_operator(skill)
+        self.assertTrue(result.ok, result.errors)
+
+    def test_nonqueued_content_skill_is_blocked_for_operator(self):
+        skill = self.copy_skill("clipmind-agent-fact-check")
+        result = self.validate_operator(skill)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("默认文案调试队列" in error for error in result.errors), result.errors)
+
+    def test_baseline_tampering_is_blocked_even_when_candidate_matches(self):
+        skill = self.copy_skill("clipmind-agent-xhs-graphic-note")
+        original_path = skill / "references/original.md"
+        candidate_path = skill / "SKILL.md"
+        original = original_path.read_text(encoding="utf-8")
+        changed = original.replace(
+            "1. 先判断主题是否适合图文笔记,并标出素材缺口。",
+            "1. 先判断主题和用户阶段是否适合图文笔记,并标出素材缺口。",
+            1,
+        )
+        original_path.write_text(changed, encoding="utf-8")
+        candidate_path.write_text(changed, encoding="utf-8")
+
+        result = self.validate_operator(skill)
+
+        self.assertFalse(result.ok)
+        self.assertTrue(any("原始基线" in error for error in result.errors), result.errors)
+
+    def test_mixed_graphic_skill_cannot_change_visual_method(self):
+        skill = self.copy_skill("clipmind-agent-xhs-graphic-note")
+        path = skill / "SKILL.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "每页给出画面建议、主文案和补充说明",
+            "每页给出高饱和画面建议、主文案和补充说明",
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+
+        result = self.validate_operator(skill)
+
+        self.assertFalse(result.ok)
+        self.assertTrue(any("视觉" in error for error in result.errors), result.errors)
+
+    def test_mixed_graphic_skill_can_change_copy_method(self):
+        skill = self.copy_skill("clipmind-agent-xhs-graphic-note")
+        path = skill / "SKILL.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "2. 提炼 3 个封面标题方向,分别覆盖痛点、结果和反常识角度。",
+            "2. 先绑定用户原话,再提炼 3 个封面标题方向,分别覆盖痛点、结果和反常识角度。",
+            1,
+        )
+        path.write_text(text, encoding="utf-8")
+
+        result = self.validate_operator(skill)
+
+        self.assertTrue(result.ok, result.errors)
 
     def test_untouched_agent_passes(self):
         skill = self.copy_skill("clipmind-agent-xhs-graphic-note")

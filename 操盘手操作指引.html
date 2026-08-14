@@ -143,20 +143,20 @@
       <div class="rail-note">一个 IP，一次一个 Skill。<br>只需要反馈内容好不好。</div>
       <nav>
         <ol class="nav" id="nav">
-          <li><a href="#step-1"><span class="nav-index">01</span><span>放入材料</span></a></li>
+          <li><a href="#step-1"><span class="nav-index">01</span><span>使用演练资料</span></a></li>
           <li><a href="#step-2"><span class="nav-index">02</span><span>开始调试</span></a></li>
           <li><a href="#step-3"><span class="nav-index">03</span><span>反馈修改</span></a></li>
           <li><a href="#step-4"><span class="nav-index">04</span><span>完成下一个</span></a></li>
         </ol>
       </nav>
-      <div class="rail-tip"><strong>不用做：</strong><br>不用安装 146 个 Skill<br>不用记技术 ID<br>不用改代码</div>
+      <div class="rail-tip"><strong>不用做：</strong><br>不用导入 IP 材料<br>不用挑选 Skill<br>不用改代码</div>
     </aside>
 
     <main class="document" id="document">
       <header class="hero" id="top">
         <div class="kicker">Quick Start · 简单操作指南</div>
         <h1>调 Skill，<br>只做四件事</h1>
-        <p class="hero-subtitle">把一个 IP 的材料放进去，Codex 会按顺序一次调一个 Skill。你只需要看结果，然后告诉它“OK”或“哪里不OK”。</p>
+        <p class="hero-subtitle">项目已内置赵玥玥 MOCK 演练资料。Codex 会从 32 个纯文案 Skill 中按顺序一次调一个，你只需要看结果，然后告诉它“OK”或“哪里不OK”。</p>
         <div class="hero-rule">
           <div class="hero-rule-label">唯一规则</div>
           <strong>每个 Skill 单独开一个 Codex 对话；全程只使用同一套 IP 材料。</strong>
@@ -166,7 +166,7 @@
       <section class="overview" aria-label="四步总览">
         <div class="overview-label">四步完成一次调试</div>
         <div class="overview-grid">
-          <div class="overview-item"><div class="overview-n">01</div><div class="overview-kind">放材料</div><div class="overview-desc">把当前 IP 的原始资料放进指定文件夹。</div></div>
+          <div class="overview-item"><div class="overview-n">01</div><div class="overview-kind">用演练资料</div><div class="overview-desc">Codex 自动装载赵玥玥合成 IP，不需要上传。</div></div>
           <div class="overview-item"><div class="overview-n">02</div><div class="overview-kind">开对话</div><div class="overview-desc">复制一句开始口令，Codex 自动找 Skill。</div></div>
           <div class="overview-item"><div class="overview-n">03</div><div class="overview-kind">给反馈</div><div class="overview-desc">只说结果哪里好、哪里不对。</div></div>
           <div class="overview-item"><div class="overview-n">04</div><div class="overview-kind">确认完成</div><div class="overview-desc">确认 OK，拿到最终 Skill，再开下一个。</div></div>
@@ -174,24 +174,24 @@
       </section>
 
       <section class="section" id="step-1">
-        <div class="section-head"><div class="chapter-index">01 / 04</div><div><div class="chapter-label">Prepare</div><h2>把 IP 材料放进去</h2></div></div>
-        <p class="lead">打开项目后，只需要找到下面这个文件夹，把当前 IP 的材料全部放进去。</p>
+        <div class="section-head"><div class="chapter-index">01 / 04</div><div><div class="chapter-label">Prepare</div><h2>直接使用内置演练资料</h2></div></div>
+        <p class="lead">打开项目后不需要导入资料。第一次初始化时，Codex 会自动装载赵玥玥的 MOCK 建档、访谈、产品、用户、案例、语料和内容数据。</p>
         <div class="step-box">
-          <h3>材料放这里</h3>
-          <span class="path">IP素材库 / 原始材料 /</span>
+          <h3>默认演练 IP</h3>
+          <span class="path">fixtures / ip / 赵玥玥 /</span>
           <ul class="plain-list">
-            <li>访谈记录、IP 介绍、产品资料、历史内容都可以。</li>
-            <li>文档、表格、图片、音视频和转写文本都可以。</li>
-            <li>保留原文件，不用提前整理或润色。</li>
+            <li>所有资料都明确标注为 MOCK，不对应真实个人。</li>
+            <li>每个 Skill 都已经绑定固定任务和材料。</li>
+            <li>如果素材库已有用户资料，Codex 绝不会覆盖或混入演练数据。</li>
           </ul>
         </div>
-        <div class="boundary"><h3>一个项目只放一个 IP</h3><p>要换另一个 IP，请复制一份新项目。不要把两个客户的材料混在同一个素材库里。</p></div>
+        <div class="boundary"><h3>只调文案</h3><p>治理、共享组件、视觉、生图、发布、监控和数据能力不进入操盘手调优队列。</p></div>
       </section>
 
       <section class="section" id="step-2">
         <div class="section-head"><div class="chapter-index">02 / 04</div><div><div class="chapter-label">Start</div><h2>新建对话，复制一句话</h2></div></div>
-        <p class="lead">用 Codex 打开整个项目，新建一个对话，把下面这句话发出去。Codex 会先整理 IP 档案，再自动开始第一个 Skill。</p>
-        <div class="command" id="first-command">请阅读《开始调试.md》，帮我完成 IP 建档并开始第一个 Skill。<button class="copy" type="button" data-copy="first-command">复制这句话</button></div>
+        <p class="lead">用 Codex 打开整个项目，新建一个对话，把下面这句话发出去。Codex 会自动装载演练资料并开始第一个文案 Skill。</p>
+        <div class="command" id="first-command">请阅读《开始调试.md》，使用赵玥玥演练资料开始第一个文案 Skill。<button class="copy" type="button" data-copy="first-command">复制这句话</button></div>
         <ul class="plain-list">
           <li>不用选择 Skill。</li>
           <li>不用复制技术 ID。</li>
@@ -237,14 +237,14 @@
         <div class="faq">
           <article class="faq-item"><h3>需要自己挑 Skill 吗？</h3><p>不需要。Codex 会按 ClipMind 业务顺序自动找下一项。</p></article>
           <article class="faq-item"><h3>反馈后要再说“修改 Skill”吗？</h3><p>不需要。回复“不OK：修改意见”就代表允许它校正当前 Skill。</p></article>
-          <article class="faq-item"><h3>材料会提交到 GitHub 吗？</h3><p>不会。素材、IP 档案、调试记录和回收包默认都被忽略。</p></article>
+          <article class="faq-item"><h3>赵玥玥是真实人物吗？</h3><p>不是。她是项目内置的合成演练 IP；资料可进入 Git，但不得用于外部宣传。运行副本、私有材料、调试记录和回收包默认被忽略。</p></article>
           <article class="faq-item"><h3>确认 OK 后会直接上线吗？</h3><p>不会。最终 Skill 仍需开发按来源映射复测并人工合入 ClipMind。</p></article>
         </div>
       </section>
 
       <footer class="final">
         <div class="kicker">That’s all</div>
-        <h2>放材料 → 开对话 → 给反馈 → 确认 OK</h2>
+        <h2>开对话 → 看文案 → 给反馈 → 确认 OK</h2>
         <p>操盘手只负责判断内容质量，其他步骤交给 Codex。</p>
       </footer>
     </main>
