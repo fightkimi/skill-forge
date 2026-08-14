@@ -18,6 +18,21 @@ def extract_definition(text: str) -> str:
     return text.split(START, 1)[1].split(END, 1)[0].strip() + "\n"
 
 
+def validate_operator_acceptance(root: Path, skill_id: str, rounds: int) -> list[str]:
+    acceptance_path = root / "tuning-records" / skill_id / "acceptance.json"
+    if not acceptance_path.exists():
+        return ["缺少操盘手确认凭据；只有明确回复 OK 后才能生成最终回收包"]
+    try:
+        acceptance = json.loads(acceptance_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return ["操盘手确认凭据无法解析"]
+    if acceptance.get("skill_id") != skill_id or acceptance.get("operator_confirmed") is not True:
+        return ["操盘手确认凭据与当前 Skill 不一致或尚未确认"]
+    if acceptance.get("rounds") != rounds:
+        return ["操盘手确认凭据的调试轮数与本次打包不一致"]
+    return []
+
+
 def build_package(root: Path, skill_id: str, rounds: int) -> tuple[Path | None, list[str]]:
     skill_dir = root / "skills" / skill_id
     if skill_id.startswith("clipmind-governance-"):
@@ -29,6 +44,9 @@ def build_package(root: Path, skill_id: str, rounds: int) -> tuple[Path | None, 
     )
     if not result.ok:
         return None, result.errors
+    acceptance_errors = validate_operator_acceptance(root, skill_id, rounds)
+    if acceptance_errors:
+        return None, acceptance_errors
 
     candidate_path = skill_dir / "SKILL.md"
     original_path = skill_dir / "references/original.md"

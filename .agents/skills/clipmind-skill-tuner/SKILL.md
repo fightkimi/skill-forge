@@ -108,10 +108,11 @@ python3 .agents/skills/clipmind-skill-tuner/scripts/skill_guard.py skills/<技�
 只有操盘手明确回复 `OK，完成这个 Skill` 才能：
 
 1. 再次运行 `skill_guard.py`。
-2. 运行 `scripts/finalize.py <技术ID> --rounds <轮数>`。
-3. 运行 `scripts/progress.py complete <技术ID> --rounds <轮数>`。
-4. 交付最终 `SKILL.md`、可合入定义、基线差异和验证结果的可点击路径。
-5. 明确说明回收包不会自动上线，工程仍需按 source-map 回写真实源文件、真模型复测并走 PR。
-6. 提醒操盘手新建对话并发送“开始调试下一个 Skill”。
+2. 把确认写入 `tuning-records/<技术ID>/acceptance.json`，字段必须为当前 `skill_id`、`operator_confirmed: true` 和实际 `rounds`；没有这份凭据时打包脚本会拒绝执行。
+3. 运行 `scripts/finalize.py <技术ID> --rounds <轮数>`。
+4. 运行 `scripts/progress.py complete <技术ID> --rounds <轮数>`。
+5. 交付最终 `SKILL.md`、可合入定义、基线差异和验证结果的可点击路径。
+6. 明确说明回收包不会自动上线，工程仍需按 source-map 回写真实源文件、真模型复测并走 PR。
+7. 提醒操盘手新建对话并发送“开始调试下一个 Skill”。
 
 不得自行宣布满意、自动完成当前 Skill 或自动进入下一项。

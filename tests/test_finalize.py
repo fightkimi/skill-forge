@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import shutil
 import sys
 import tempfile
@@ -41,14 +42,48 @@ class FinalizeTest(unittest.TestCase):
     def copy_skill(self, skill_id: str):
         shutil.copytree(ROOT / "skills" / skill_id, self.temp_root / "skills" / skill_id)
 
+    def write_acceptance(self, skill_id: str, rounds: int):
+        record_dir = self.temp_root / "tuning-records" / skill_id
+        record_dir.mkdir(parents=True)
+        (record_dir / "acceptance.json").write_text(
+            json.dumps(
+                {
+                    "skill_id": skill_id,
+                    "operator_confirmed": True,
+                    "rounds": rounds,
+                }
+            ),
+            encoding="utf-8",
+        )
+
     def test_builds_complete_package_for_tuneable_skill(self):
         skill_id = "clipmind-agent-xhs-graphic-note"
         self.copy_skill(skill_id)
+        self.write_acceptance(skill_id, 2)
         output, errors = self.module.build_package(self.temp_root, skill_id, 2)
         self.assertEqual([], errors)
         self.assertIsNotNone(output)
         for name in ("SKILL.md", "source-map.md", "mergeable-definition.md", "baseline-vs-final.diff", "validation.md"):
             self.assertTrue((output / name).exists(), name)
+
+    def test_refuses_package_without_operator_acceptance(self):
+        skill_id = "clipmind-agent-xhs-graphic-note"
+        self.copy_skill(skill_id)
+
+        output, errors = self.module.build_package(self.temp_root, skill_id, 2)
+
+        self.assertIsNone(output)
+        self.assertTrue(any("操盘手确认" in error for error in errors), errors)
+
+    def test_refuses_stale_operator_acceptance(self):
+        skill_id = "clipmind-agent-xhs-graphic-note"
+        self.copy_skill(skill_id)
+        self.write_acceptance(skill_id, 1)
+
+        output, errors = self.module.build_package(self.temp_root, skill_id, 2)
+
+        self.assertIsNone(output)
+        self.assertTrue(any("轮数" in error for error in errors), errors)
 
     def test_refuses_governance_package(self):
         skill_id = "clipmind-governance-ip-consistency-v1"
