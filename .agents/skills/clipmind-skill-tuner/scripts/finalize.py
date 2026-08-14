@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import json
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -19,11 +20,15 @@ def extract_definition(text: str) -> str:
 
 def build_package(root: Path, skill_id: str, rounds: int) -> tuple[Path | None, list[str]]:
     skill_dir = root / "skills" / skill_id
-    result = validate_skill_dir(skill_dir)
-    if not result.ok:
-        return None, result.errors
     if skill_id.startswith("clipmind-governance-"):
         return None, ["治理 Skill 只读，请生成工程变更建议单而不是最终校正 Skill"]
+    result = validate_skill_dir(
+        skill_dir,
+        project_root=root,
+        enforce_operator_scope=True,
+    )
+    if not result.ok:
+        return None, result.errors
 
     candidate_path = skill_dir / "SKILL.md"
     original_path = skill_dir / "references/original.md"
@@ -45,13 +50,17 @@ def build_package(root: Path, skill_id: str, rounds: int) -> tuple[Path | None, 
     )
     (output_dir / "baseline-vs-final.diff").write_text(diff or "# 与初始基线无差异\n", encoding="utf-8")
     timestamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    lock_data = json.loads(
+        (root / "inventory/baseline-locks.json").read_text(encoding="utf-8")
+    )
+    baseline_hash = lock_data["skills"][skill_id]
     (output_dir / "validation.md").write_text(
         "# 验证结果\n\n"
         f"- Skill：`{skill_id}`\n"
         f"- 调试轮数：{rounds}\n"
         f"- 收口时间（UTC）：{timestamp}\n"
         "- 不可修改边界：通过\n"
-        "- 原始基线：未修改\n"
+        f"- 原始基线：未修改（SHA-256: `{baseline_hash}`）\n"
         "- 上线状态：未上线；需开发按 source-map 定位真实源文件并使用生产模型复测\n",
         encoding="utf-8",
     )
