@@ -14,6 +14,24 @@ SCRIPT = SCRIPTS / "project_check.py"
 
 
 class ProjectCheckTest(unittest.TestCase):
+    def test_operator_docs_describe_copy_only_fixture_workflow(self):
+        docs = {
+            "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+            "开始调试.md": (ROOT / "开始调试.md").read_text(encoding="utf-8"),
+            "调试顺序.md": (ROOT / "调试顺序.md").read_text(encoding="utf-8"),
+            "tuner": (
+                ROOT / ".agents/skills/clipmind-skill-tuner/SKILL.md"
+            ).read_text(encoding="utf-8"),
+        }
+        for name, text in docs.items():
+            self.assertIn("32", text, name)
+            self.assertIn("赵玥玥", text, name)
+        self.assertIn("scenarios.json", docs["tuner"])
+        self.assertIn("同一任务和材料", docs["tuner"])
+        self.assertNotIn("88 个内容 Skill", docs["README.md"])
+        self.assertNotIn("22 个生图 Skill", docs["README.md"])
+        self.assertNotIn("治理 Skill 是例外", docs["开始调试.md"])
+
     def load_project_check(self):
         sys.path.insert(0, str(SCRIPTS))
         spec = importlib.util.spec_from_file_location("project_check", SCRIPT)
