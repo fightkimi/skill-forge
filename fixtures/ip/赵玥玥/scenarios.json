@@ -1,0 +1,284 @@
+{
+  "fixture_id": "zhao-yueyue",
+  "fixture_name": "赵玥玥",
+  "data_classification": "MOCK_SYNTHETIC_ONLY",
+  "skills": {
+    "clipmind-sop-ip-s01-profile-extract": {
+      "task": "基于建档材料提炼赵玥玥的 8 个核心档案维度候选，逐项标明证据和待确认项。",
+      "materials": [
+        "EVIDENCE-INDEX.md",
+        "原始材料/01-人物访谈.md",
+        "原始材料/02-业务与产品.md",
+        "原始材料/03-用户访谈与评论.md"
+      ]
+    },
+    "clipmind-sop-ip-s01-profile-extract-aux": {
+      "task": "从案例、历史内容和表现材料中提炼可补充进入赵玥玥档案的信息，并识别冲突。",
+      "materials": [
+        "EVIDENCE-INDEX.md",
+        "原始材料/04-案例记录.md",
+        "原始材料/06-历史内容样本.md",
+        "原始材料/07-内容表现数据.md"
+      ]
+    },
+    "clipmind-sop-ip-s01-profile-draft": {
+      "task": "生成一版可供人工确认的赵玥玥 IP 档案草稿，避免把弱证据写成确定事实。",
+      "materials": [
+        "PROFILE.md",
+        "EVIDENCE-INDEX.md",
+        "原始材料/01-人物访谈.md",
+        "原始材料/02-业务与产品.md"
+      ]
+    },
+    "clipmind-sop-ip-s01-5-ip-breakdown": {
+      "task": "按经历、结果、代价、判断、方法、案例、性格、稀缺性拆解赵玥玥的内容资产。",
+      "materials": [
+        "PROFILE.md",
+        "EVIDENCE-INDEX.md",
+        "原始材料/01-人物访谈.md",
+        "原始材料/04-案例记录.md"
+      ]
+    },
+    "clipmind-sop-ip-s02-diagnosis": {
+      "task": "诊断赵玥玥当前从定制操盘转向方法产品时的业务阶段、核心卡点和定位问题。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/02-业务与产品.md",
+        "原始材料/07-内容表现数据.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-sop-ip-s-language-extract": {
+      "task": "提炼赵玥玥可复用的语气、句式、常用词、禁用表达和自然口播示例。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/01-人物访谈.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/06-历史内容样本.md"
+      ]
+    },
+    "clipmind-sop-ip-s03-stage-advice": {
+      "task": "判断赵玥玥当前 IP 阶段，给出六周阶段目标和最小下一步建议。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/02-业务与产品.md",
+        "原始材料/07-内容表现数据.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-sop-ip-s03-strategy-suggestion": {
+      "task": "为赵玥玥制定本轮内容策略，说明核心主张、信任理由、差异化打法和风险边界。",
+      "materials": [
+        "PROFILE.md",
+        "EVIDENCE-INDEX.md",
+        "原始材料/02-业务与产品.md",
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-sop-ip-s04-content-plan-suggestion": {
+      "task": "基于六周目标和真实产能生成两周内容计划草案，不为填满日期虚增任务。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/07-内容表现数据.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-sop-ip-s04-content-topic-suggestion": {
+      "task": "从候选池中生成一条优先选题建议，解释它服务的用户问题、阶段目标和所需证据。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-agent-user-persona-analysis": {
+      "task": "从用户访谈、评论和业务边界中整理赵玥玥当前最值得服务的用户画像与待验证问题。",
+      "materials": [
+        "原始材料/02-业务与产品.md",
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/07-内容表现数据.md"
+      ]
+    },
+    "clipmind-agent-pain-point-insight": {
+      "task": "区分目标用户关于没选题、返工和咨询不准的显性痛点、深层动机与内容机会。",
+      "materials": [
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/04-案例记录.md",
+        "原始材料/07-内容表现数据.md"
+      ]
+    },
+    "clipmind-agent-emotion-breakdown": {
+      "task": "拆解用户评论中的失控感、怀疑、焦虑和希望，给出不放大焦虑的内容表达方向。",
+      "materials": [
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/06-历史内容样本.md"
+      ]
+    },
+    "clipmind-agent-comment-insight": {
+      "task": "从评论和私信问题中提炼高频疑问、信任阻力、选题机会和需要继续验证的问题。",
+      "materials": [
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/07-内容表现数据.md"
+      ]
+    },
+    "clipmind-agent-content-schedule-planner": {
+      "task": "把六周目标、选题池和每周产能整理成两周内容周期建议。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/07-内容表现数据.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-agent-content-matrix-planner": {
+      "task": "为赵玥玥规划主账号的栏目分层与内容角色，不扩张到当前产能无法承受的矩阵账号。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/02-业务与产品.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-agent-content-gap-analysis": {
+      "task": "对照用户问题、历史内容和阶段目标，找出赵玥玥当前内容体系的主题与证据缺口。",
+      "materials": [
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/06-历史内容样本.md",
+        "原始材料/07-内容表现数据.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-agent-topic-planner": {
+      "task": "生成一个两周可执行选题池，逐条标出用户问题、内容角色、证据需求和平台方向。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/07-内容表现数据.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-sop-production-s06-5-script": {
+      "task": "围绕“老板总改稿，真的是控制欲强吗”生成一条 60—90 秒口播脚本。",
+      "materials": [
+        "PROFILE.md",
+        "EVIDENCE-INDEX.md",
+        "原始材料/04-案例记录.md",
+        "原始材料/05-表达语料.md"
+      ]
+    },
+    "clipmind-agent-xhs-graphic-note": {
+      "task": "把“内容计划不是把日期填满”写成小红书图文笔记文案；只评价标题、分页文字、正文和标签，不评价视觉。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/04-案例记录.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-agent-xhs-strategy": {
+      "task": "为赵玥玥制定六周小红书内容策略，聚焦栏目、选题结构和信任推进，不涉及视觉调优。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/02-业务与产品.md",
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/07-内容表现数据.md"
+      ]
+    },
+    "clipmind-agent-xhs-topic-inspiration": {
+      "task": "生成十个小红书选题灵感，避免泛励志和夸张收益，标明素材需求。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/07-内容表现数据.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-agent-bilibili-planner": {
+      "task": "把“一条脚本如何从访谈长出来”策划成一条 B 站中长视频内容方案。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/06-历史内容样本.md"
+      ]
+    },
+    "clipmind-agent-douyin-script": {
+      "task": "围绕“你不是没有选题，是没有不能乱说的边界”生成一条抖音短视频脚本。",
+      "materials": [
+        "PROFILE.md",
+        "EVIDENCE-INDEX.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/06-历史内容样本.md"
+      ]
+    },
+    "clipmind-agent-short-video-strategy": {
+      "task": "为赵玥玥设计六周短视频内容打法，匹配每周三条短内容的真实产能。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/02-业务与产品.md",
+        "原始材料/07-内容表现数据.md",
+        "原始材料/08-阶段目标与选题池.md"
+      ]
+    },
+    "clipmind-agent-script-polish": {
+      "task": "把历史样本 S05 的慢开头改成赵玥玥能自然说出口的开场，并保留修改说明。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/06-历史内容样本.md"
+      ]
+    },
+    "clipmind-agent-wechat-video-script": {
+      "task": "围绕 CASE-A 生成一条稳重可信的视频号口播脚本，明确案例限制和人工确认点。",
+      "materials": [
+        "PROFILE.md",
+        "EVIDENCE-INDEX.md",
+        "原始材料/04-案例记录.md",
+        "原始材料/05-表达语料.md"
+      ]
+    },
+    "clipmind-agent-longform-to-short-video": {
+      "task": "把历史内容样本 L01 压缩成一条 90 秒短视频脚本，不丢失证据边界。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/06-历史内容样本.md"
+      ]
+    },
+    "clipmind-agent-content-rewrite-polish": {
+      "task": "改写历史样本 S03，使它具体、自然、有赵玥玥的判断，同时不补造案例。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/06-历史内容样本.md"
+      ]
+    },
+    "clipmind-agent-multi-platform-rewrite": {
+      "task": "把历史样本 S01 分别改写成小红书、抖音口播、视频号和朋友圈版本。",
+      "materials": [
+        "PROFILE.md",
+        "EVIDENCE-INDEX.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/06-历史内容样本.md"
+      ]
+    },
+    "clipmind-agent-opening-hook-analysis": {
+      "task": "分析历史样本 S05 为什么开头太慢，并给出三个符合赵玥玥风格的替代钩子。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/05-表达语料.md",
+        "原始材料/06-历史内容样本.md"
+      ]
+    },
+    "clipmind-agent-title-hook-generator": {
+      "task": "围绕“老板总改稿”生成多角度标题和开场钩子，避免夸张承诺并标明适用平台。",
+      "materials": [
+        "PROFILE.md",
+        "原始材料/03-用户访谈与评论.md",
+        "原始材料/04-案例记录.md",
+        "原始材料/05-表达语料.md"
+      ]
+    }
+  }
+}
