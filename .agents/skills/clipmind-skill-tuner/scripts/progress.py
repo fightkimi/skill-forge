@@ -57,6 +57,58 @@ def load_order(path: Path) -> list[dict[str, Any]]:
     return data["skills"] if isinstance(data, dict) else data
 
 
+def order_index(order: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return {item["skill_id"]: item for item in order}
+
+
+def incomplete_dependencies(
+    state: dict[str, Any],
+    item: dict[str, Any],
+) -> list[str]:
+    return [
+        skill_id
+        for skill_id in item.get("depends_on", [])
+        if state["skills"].get(skill_id, {}).get("status") != "completed"
+    ]
+
+
+def accepted_output_path(state: dict[str, Any], skill_id: str) -> str:
+    rounds = int(state["skills"].get(skill_id, {}).get("rounds", 0))
+    return f"tuning-records/{skill_id}/round-{rounds:02d}-output.md"
+
+
+def validate_accepted_output(
+    records_root: Path,
+    skill_id: str,
+    expected_rounds: Optional[int] = None,
+) -> list[str]:
+    record_dir = records_root / skill_id
+    acceptance_path = record_dir / "acceptance.json"
+    if not acceptance_path.exists():
+        return [f"{skill_id} 缺少操盘手确认凭据和已确认输出"]
+    try:
+        acceptance = json.loads(acceptance_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return [f"{skill_id} 的操盘手确认凭据无法解析"]
+    rounds = acceptance.get("rounds")
+    if (
+        acceptance.get("skill_id") != skill_id
+        or acceptance.get("operator_confirmed") is not True
+        or not isinstance(rounds, int)
+        or rounds < 1
+    ):
+        return [f"{skill_id} 尚无有效的操盘手已确认输出"]
+    if expected_rounds is not None and rounds != expected_rounds:
+        return [
+            f"{skill_id} 的操盘手确认轮数与进度不一致"
+            f"（确认 {rounds}，进度 {expected_rounds}）"
+        ]
+    output_path = record_dir / f"round-{rounds:02d}-output.md"
+    if not output_path.exists():
+        return [f"{skill_id} 缺少第 {rounds} 轮已确认输出"]
+    return []
+
+
 def material_library_has_user_content(root: Path) -> bool:
     library = root / "IP素材库"
     if any((library / name).exists() for name in PROFILE_FILES):
@@ -169,7 +221,7 @@ def load_or_initialize(
         state = json.loads(state_path.read_text(encoding="utf-8"))
     else:
         state = {
-            "version": 2,
+            "version": 3,
             "ip_profile_status": "not_ready",
             "profile_mode": "unconfigured",
             "active_ip_fixture": None,
@@ -180,6 +232,7 @@ def load_or_initialize(
         }
 
     reconcile_state(state, order)
+    state["version"] = 3
     state.setdefault("profile_mode", "unconfigured")
     state.setdefault("active_ip_fixture", None)
     if project_root is not None:
@@ -216,26 +269,125 @@ def next_item(state: dict[str, Any], order: list[dict[str, Any]]) -> dict[str, A
     if active:
         return next((item for item in order if item["skill_id"] == active), None)
     for item in order:
-        if state["skills"].get(item["skill_id"], {}).get("status") != "completed":
+        if (
+            state["skills"].get(item["skill_id"], {}).get("status") != "completed"
+            and not incomplete_dependencies(state, item)
+        ):
             return item
     return None
 
 
-def mark_started(state: dict[str, Any], skill_id: str) -> None:
+def item_card(
+    state: dict[str, Any],
+    order: list[dict[str, Any]],
+    item: dict[str, Any],
+) -> dict[str, Any]:
+    by_id = order_index(order)
+    dependencies = []
+    for dependency_id in item.get("depends_on", []):
+        dependency = by_id[dependency_id]
+        dependencies.append(
+            {
+                "skill_id": dependency_id,
+                "name": dependency["name"],
+                "status": state["skills"][dependency_id]["status"],
+                "output_label": dependency["output_label"],
+            }
+        )
+    upstream_outputs = []
+    for dependency_id in item.get("consumes_outputs_from", []):
+        dependency = by_id[dependency_id]
+        upstream_outputs.append(
+            {
+                "skill_id": dependency_id,
+                "name": dependency["name"],
+                "output_label": dependency["output_label"],
+                "path": accepted_output_path(state, dependency_id),
+            }
+        )
+    return {
+        "display_title": f"第 {item['order']}/{len(order)} 个 · {item['name']}",
+        "order": item["order"],
+        "total": len(order),
+        "skill_id": item["skill_id"],
+        "name": item["name"],
+        "phase": item.get("phase"),
+        "phase_name": item.get("phase_name"),
+        "status": state["skills"][item["skill_id"]]["status"],
+        "purpose": item.get("purpose", ""),
+        "selection_reason": item["selection_reason"],
+        "output_label": item["output_label"],
+        "dependencies": dependencies,
+        "upstream_outputs": upstream_outputs,
+    }
+
+
+def current_card(
+    state: dict[str, Any],
+    order: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    active = state.get("active_skill")
+    if not active:
+        return None
+    item = order_index(order).get(active)
+    return item_card(state, order, item) if item else None
+
+
+def mark_started(
+    state: dict[str, Any],
+    order: list[dict[str, Any]],
+    skill_id: str,
+    records_root: Optional[Path] = None,
+) -> None:
     active = state.get("active_skill")
     if active and active != skill_id:
         raise ValueError(f"已有正在调试的 Skill：{active}。请先完成它，不能在同一对话串入 {skill_id}。")
     if skill_id not in state["skills"]:
         raise ValueError(f"未知 Skill：{skill_id}")
+    item = order_index(order).get(skill_id)
+    if item is None:
+        raise ValueError(f"Skill 不在当前调试顺序中：{skill_id}")
+    missing = incomplete_dependencies(state, item)
+    if missing:
+        by_id = order_index(order)
+        labels = [f"{by_id[dependency_id]['name']}（{dependency_id}）" for dependency_id in missing]
+        raise ValueError(f"当前 Skill 尚未解锁；请先完成：{'、'.join(labels)}")
+    if records_root is not None:
+        errors = []
+        for dependency_id in item.get("consumes_outputs_from", []):
+            expected_rounds = int(state["skills"][dependency_id].get("rounds", 0))
+            errors.extend(
+                validate_accepted_output(
+                    records_root,
+                    dependency_id,
+                    expected_rounds=expected_rounds,
+                )
+            )
+        if errors:
+            raise ValueError("无法读取上游已确认输出：" + "；".join(errors))
     state["active_skill"] = skill_id
     state["skills"][skill_id]["status"] = "in_progress"
 
 
-def mark_completed(state: dict[str, Any], skill_id: str, rounds: int) -> None:
-    if state.get("active_skill") not in (None, skill_id):
-        raise ValueError(f"当前正在调试 {state['active_skill']}，不能完成 {skill_id}")
+def mark_completed(
+    state: dict[str, Any],
+    skill_id: str,
+    rounds: int,
+    records_root: Optional[Path] = None,
+) -> None:
+    if state.get("active_skill") != skill_id:
+        active = state.get("active_skill") or "无"
+        raise ValueError(f"当前正在调试 {active}，不能完成 {skill_id}")
     if skill_id not in state["skills"]:
         raise ValueError(f"未知 Skill：{skill_id}")
+    if records_root is not None:
+        errors = validate_accepted_output(
+            records_root,
+            skill_id,
+            expected_rounds=rounds,
+        )
+        if errors:
+            raise ValueError("当前 Skill 缺少已确认输出：" + "；".join(errors))
     state["skills"][skill_id] = {
         "status": "completed",
         "rounds": rounds,
@@ -249,13 +401,21 @@ def summary(state: dict[str, Any], order: list[dict[str, Any]]) -> dict[str, Any
     for item in order:
         status = state["skills"][item["skill_id"]]["status"]
         counts[status] = counts.get(status, 0) + 1
-    return {**counts, "total": len(order), "active_skill": state.get("active_skill")}
+    return {
+        **counts,
+        "total": len(order),
+        "active_skill": state.get("active_skill"),
+        "current_skill": current_card(state, order),
+    }
 
 
 def main() -> int:
     root = Path(__file__).resolve().parents[4]
     parser = argparse.ArgumentParser(description="读取或更新 Skill Forge 本地调试进度")
-    parser.add_argument("command", choices=("init", "next", "start", "complete", "status", "profile-ready"))
+    parser.add_argument(
+        "command",
+        choices=("init", "next", "start", "complete", "status", "current", "profile-ready"),
+    )
     parser.add_argument("skill_id", nargs="?")
     parser.add_argument("--rounds", type=int, default=1)
     parser.add_argument("--order", type=Path, default=root / "inventory/tuning-order.json")
@@ -274,16 +434,44 @@ def main() -> int:
         elif args.command == "start":
             if not args.skill_id:
                 parser.error("start 需要 skill_id")
-            mark_started(state, args.skill_id)
+            mark_started(
+                state,
+                order,
+                args.skill_id,
+                records_root=root / "tuning-records",
+            )
             save_state(args.state, state)
+            print(json.dumps(current_card(state, order), ensure_ascii=False, indent=2))
+            return 0
         elif args.command == "complete":
             if not args.skill_id:
                 parser.error("complete 需要 skill_id")
-            mark_completed(state, args.skill_id, args.rounds)
+            mark_completed(
+                state,
+                args.skill_id,
+                args.rounds,
+                records_root=root / "tuning-records",
+            )
             save_state(args.state, state)
         elif args.command == "next":
             item = next_item(state, order)
-            print(json.dumps(item, ensure_ascii=False, indent=2) if item else "ALL_DONE")
+            if item:
+                print(json.dumps(item_card(state, order, item), ensure_ascii=False, indent=2))
+            elif all(
+                state["skills"][entry["skill_id"]]["status"] == "completed"
+                for entry in order
+            ):
+                print("ALL_DONE")
+            else:
+                print("BLOCKED：仍有 Skill 未完成，但其依赖关系尚未满足。", file=sys.stderr)
+                return 2
+            return 0
+        elif args.command == "current":
+            card = current_card(state, order)
+            if card is None:
+                print("BLOCKED：当前没有正在调试的 Skill。", file=sys.stderr)
+                return 2
+            print(json.dumps(card, ensure_ascii=False, indent=2))
             return 0
         elif args.command in ("init", "status"):
             pass

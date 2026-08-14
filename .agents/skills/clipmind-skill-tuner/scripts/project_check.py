@@ -70,6 +70,45 @@ FIXTURE_SERIES = {
 }
 
 
+def check_tuning_dependencies(order: list[dict[str, object]]) -> list[str]:
+    errors: list[str] = []
+    known_ids = {str(item.get("skill_id", "")) for item in order}
+    seen_ids: set[str] = set()
+    for item in order:
+        skill_id = str(item.get("skill_id", ""))
+        dependencies = item.get("depends_on")
+        consumed = item.get("consumes_outputs_from")
+        if not isinstance(dependencies, list):
+            errors.append(f"{skill_id} 缺少 depends_on 依赖清单")
+            dependencies = []
+        if not isinstance(consumed, list):
+            errors.append(f"{skill_id} 缺少 consumes_outputs_from 上游产物清单")
+            consumed = []
+        dependency_ids = [str(value) for value in dependencies]
+        consumed_ids = [str(value) for value in consumed]
+        if len(dependency_ids) != len(set(dependency_ids)):
+            errors.append(f"{skill_id} 的依赖清单存在重复项")
+        unknown = set(dependency_ids) - known_ids
+        if unknown:
+            errors.append(f"{skill_id} 引用了未知依赖：{sorted(unknown)}")
+        not_earlier = set(dependency_ids) - seen_ids
+        if not_earlier:
+            errors.append(
+                f"{skill_id} 只能依赖排在前面的 Skill：{sorted(not_earlier)}"
+            )
+        not_dependencies = set(consumed_ids) - set(dependency_ids)
+        if not_dependencies:
+            errors.append(
+                f"{skill_id} 读取了未声明为依赖的上游产物：{sorted(not_dependencies)}"
+            )
+        if not str(item.get("selection_reason", "")).strip():
+            errors.append(f"{skill_id} 缺少面向操盘手的选择理由")
+        if not str(item.get("output_label", "")).strip():
+            errors.append(f"{skill_id} 缺少本 Skill 产物名称")
+        seen_ids.add(skill_id)
+    return errors
+
+
 def check_builtin_fixture(root: Path, queue_ids: set[str]) -> list[str]:
     errors: list[str] = []
     fixture = root / "fixtures/ip/小月"
@@ -196,6 +235,7 @@ def run_checks(root: Path) -> list[str]:
         errors.append("操盘手清单包含未导出的 Skill")
     if not order_ids.isdisjoint(optional_ids):
         errors.append("默认调试队列与按需文案清单发生重叠")
+    errors.extend(check_tuning_dependencies(order))
     errors.extend(check_builtin_fixture(root, order_ids))
     errors.extend(check_baseline_locks(root, order_ids))
 

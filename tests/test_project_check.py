@@ -44,6 +44,9 @@ class ProjectCheckTest(unittest.TestCase):
             self.assertNotIn("赵玥玥", text, name)
         self.assertIn("scenarios.json", docs["tuner"])
         self.assertIn("同一任务和材料", docs["tuner"])
+        self.assertIn("当前调试", docs["tuner"])
+        self.assertIn("依赖", docs["tuner"])
+        self.assertIn("当前调试", docs["开始调试.md"])
         self.assertNotIn("88 个内容 Skill", docs["README.md"])
         self.assertNotIn("22 个生图 Skill", docs["README.md"])
         self.assertNotIn("治理 Skill 是例外", docs["开始调试.md"])
@@ -100,6 +103,35 @@ class ProjectCheckTest(unittest.TestCase):
         finally:
             sys.path.remove(str(SCRIPTS))
 
+    def test_project_check_detects_invalid_tuning_dependency_graph(self):
+        module = self.load_project_check()
+        try:
+            self.assertTrue(hasattr(module, "check_tuning_dependencies"))
+            invalid = [
+                {
+                    "order": 1,
+                    "skill_id": "skill-a",
+                    "depends_on": ["skill-b"],
+                    "consumes_outputs_from": ["skill-b"],
+                    "selection_reason": "错误示例",
+                    "output_label": "A 输出",
+                },
+                {
+                    "order": 2,
+                    "skill_id": "skill-b",
+                    "depends_on": [],
+                    "consumes_outputs_from": [],
+                    "selection_reason": "错误示例",
+                    "output_label": "B 输出",
+                },
+            ]
+
+            errors = module.check_tuning_dependencies(invalid)
+
+            self.assertTrue(any("只能依赖排在前面的" in error for error in errors), errors)
+        finally:
+            sys.path.remove(str(SCRIPTS))
+
     def test_builtin_fixture_is_complete_synthetic_and_mapped_to_queue(self):
         for relative, minimum in MIN_FIXTURE_CHARACTERS.items():
             path = FIXTURE / relative
@@ -145,6 +177,37 @@ class ProjectCheckTest(unittest.TestCase):
             {item.get("source_order") for item in queue},
         )
         self.assertEqual(list(range(1, 33)), [item["order"] for item in queue])
+        positions = {item["skill_id"]: item["order"] for item in queue}
+        self.assertLess(
+            positions["clipmind-agent-user-persona-analysis"],
+            positions["clipmind-sop-ip-s03-strategy-suggestion"],
+        )
+        self.assertLess(
+            positions["clipmind-agent-pain-point-insight"],
+            positions["clipmind-sop-ip-s03-strategy-suggestion"],
+        )
+        self.assertLess(
+            positions["clipmind-agent-xhs-strategy"],
+            positions["clipmind-agent-xhs-graphic-note"],
+        )
+        self.assertLess(
+            positions["clipmind-agent-short-video-strategy"],
+            positions["clipmind-sop-production-s06-5-script"],
+        )
+        queue_ids = {item["skill_id"] for item in queue}
+        seen_ids = set()
+        for item in queue:
+            self.assertIn("depends_on", item)
+            self.assertIn("consumes_outputs_from", item)
+            self.assertTrue(item["selection_reason"].strip())
+            self.assertTrue(item["output_label"].strip())
+            self.assertTrue(set(item["depends_on"]).issubset(seen_ids), item["skill_id"])
+            self.assertTrue(
+                set(item["consumes_outputs_from"]).issubset(set(item["depends_on"])),
+                item["skill_id"],
+            )
+            self.assertTrue(set(item["depends_on"]).issubset(queue_ids))
+            seen_ids.add(item["skill_id"])
 
     def test_optional_copy_skills_are_separate_and_disabled(self):
         optional_path = ROOT / "inventory/optional-copy-skills.json"

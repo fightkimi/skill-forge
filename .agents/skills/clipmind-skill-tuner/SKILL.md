@@ -1,6 +1,6 @@
 ---
 name: clipmind-skill-tuner
-description: 引导 IP 操盘手使用内置“小月”合成材料，按 32 个纯文案 Skill 的业务顺序，一次一个地模拟工作台生成、反馈、边界内最小修改、同输入复跑并收口。用户说“开始调试”“开始下一个 Skill”“不OK”或“OK，完成这个 Skill”时使用。
+description: 引导 IP 操盘手使用内置“小月”合成材料，按依赖关系解锁 32 个纯文案 Skill，一次一个地模拟工作台生成、反馈、边界内最小修改、同输入复跑并收口；每轮明确展示当前 Skill、选择理由和上游产物。用户说“开始调试”“开始下一个 Skill”“不OK”或“OK，完成这个 Skill”时使用。
 ---
 
 # ClipMind 纯文案 Skill 调试引导
@@ -19,35 +19,45 @@ description: 引导 IP 操盘手使用内置“小月”合成材料，按 32 �
 
 “小月”是合成演练人物，不对应真实个人。不得把演练经历、产品、客户、价格、案例或数据描述成真实事实。
 
-## 2. 取得当前唯一文案 Skill
+## 2. 按依赖取得当前唯一文案 Skill
 
 1. 运行 `scripts/progress.py next`。
 2. 若返回已有进行中 Skill，继续它，不切换。
 3. 若返回新 Skill，运行 `scripts/progress.py start <技术ID>`。
-4. 进度只能返回 `inventory/tuning-order.json` 中的 32 个默认文案 Skill；不要手动启动其他 Skill。
-5. 完整读取当前目录的：
+4. `next` 只选择依赖已经完成的最早一项；`start` 再次检查依赖状态和必须读取的操盘手已确认输出。任一上游未完成、未确认或输出文件缺失时停止，不得跳过、伪造或改选后面的 Skill。
+5. 进度只能返回 `inventory/tuning-order.json` 中的 32 个默认文案 Skill；不要手动启动其他 Skill。
+6. 完整读取当前目录的：
    - `SKILL.md`
    - `agents/openai.yaml`
    - `references/original.md`
    - `references/source-map.md`
    - `references/platform-context.md`
    - `evals/cases.md`
-6. 不读取或修改另一个业务 Skill 的正文。
+7. 不读取或修改另一个业务 Skill 的正文；只允许读取当前卡片 `upstream_outputs` 列出的上游最终业务输出。
 
-首次展示只用一张短表：中文名、技术 ID、业务阶段、读取材料、固定任务和本轮文案目标。不要向操盘手展示内部 Prompt 工程细节。
+每次首轮生成、接收反馈、复跑和最终确认前都运行 `scripts/progress.py current`，并把结果放在回复最前面，固定显示：
+
+- `当前调试：第 X/32 个 · <中文名>`
+- `技术 ID` 和 `所在环节`
+- `为什么现在调`（直接使用 `selection_reason`）
+- `承接的已确认产物`（没有则写“工作流起点，无上游产物”）
+- `本轮要产出什么`（使用 `output_label`）
+
+不要只显示技术 ID，也不要向操盘手展示内部 Prompt 工程细节。
 
 ## 3. 自动取得固定任务和材料
 
 1. 读取 `fixtures/ip/小月/scenarios.json` 中与当前技术 ID 对应的场景。
-2. 只读取该场景列出的 `materials`；需要核对证据时可补读 `EVIDENCE-INDEX.md`，但不得引入其他 IP 或互联网事实。
-3. 把场景中的 `task`、材料文件、限制条件和初始目标保存为 `tuning-records/<技术ID>/fixed-input.md`。
-4. 首轮和所有复跑必须使用同一任务和材料。操盘手补充的新限制单独追加并注明轮次，不得换题、换平台或换材料制造改善。
-5. 如果固定任务与当前 Skill 的真实输入契约冲突，停止并报告项目映射错误；不得改输入契约迁就场景。
+2. 只读取该场景列出的静态 `materials`；需要核对证据时可补读 `EVIDENCE-INDEX.md`，但不得引入其他 IP 或互联网事实。
+3. 逐一读取当前卡片 `upstream_outputs` 指向的已确认上游输出。它们是模拟工作台上下文，不是修改当前 Skill 输入契约的理由。
+4. 把固定任务、静态材料、上游输出路径、限制条件和初始目标保存为 `tuning-records/<技术ID>/fixed-input.md`。
+5. 首轮和所有复跑必须使用同一任务、静态材料和上游输出快照。操盘手补充的新限制单独追加并注明轮次，不得换题、换平台、换材料或改用上游草稿制造改善。
+6. 如果上游输出与当前 Skill 的真实输入契约冲突，停止并报告项目映射错误；不得改输入契约迁就场景。
 
 ## 4. 模拟工作台生成首轮内容
 
-1. 严格按当前 `SKILL.md` 中的候选定义执行，模拟 ClipMind 工作台调用当前 Skill。
-2. 先说明实际读取的材料和本轮任务，再输出完整业务结果。
+1. 先展示“当前调试”卡，再严格按当前 `SKILL.md` 中的候选定义执行，模拟 ClipMind 工作台调用当前 Skill。
+2. 说明实际读取的静态材料、上游已确认产物和本轮任务，再输出完整业务结果。
 3. 关键结论必须能追溯到材料；弱证据、冲突和缺口明确标出。
 4. 不使用互联网补充小月事实，不把 MOCK 数据写成真实宣传，不执行发布、投流、写库或状态变更。
 5. 保存首轮完整输出到 `tuning-records/<技术ID>/round-01-output.md`。
@@ -59,7 +69,7 @@ description: 引导 IP 操盘手使用内置“小月”合成材料，按 32 �
 
 ## 5. 处理“不OK”反馈
 
-把反馈原文和轮次写入当前调试记录，然后：
+先重新展示同一张“当前调试”卡，确认反馈仍属于当前 Skill；再把反馈原文和轮次写入当前调试记录，然后：
 
 1. 列出操盘手明确要求保留的部分。
 2. 将问题归为：删除、加强、修正、格式、边界、当前 IP 个案、待确认。
@@ -95,11 +105,12 @@ python3 .agents/skills/clipmind-skill-tuner/scripts/skill_guard.py skills/<技�
 
 通过校验后：
 
-1. 读取 `fixed-input.md`，使用同一任务和材料重新模拟工作台生成。
-2. 不复用上一轮正文作为答案；上一轮只用于对照反馈是否改善。
-3. 检查已改善、未改善、新问题和是否损伤已确认部分。
-4. 保存完整输出到 `tuning-records/<技术ID>/round-<轮次>-output.md`。
-5. 用简短对比说明变化，再给固定二选一。
+1. 重新展示“当前调试”卡。
+2. 读取 `fixed-input.md`，使用同一任务、静态材料和上游输出快照重新模拟工作台生成。
+3. 不复用上一轮正文作为答案；上一轮只用于对照反馈是否改善。
+4. 检查已改善、未改善、新问题和是否损伤已确认部分。
+5. 保存完整输出到 `tuning-records/<技术ID>/round-<轮次>-output.md`。
+6. 用简短对比说明变化，再给固定二选一。
 
 如果结果没有改善，如实说明并继续迭代；不得换题制造改善。
 
@@ -107,12 +118,13 @@ python3 .agents/skills/clipmind-skill-tuner/scripts/skill_guard.py skills/<技�
 
 只有操盘手明确回复 `OK，完成这个 Skill` 才能：
 
-1. 再次运行 `skill_guard.py`。
-2. 把确认写入 `tuning-records/<技术ID>/acceptance.json`，字段必须为当前 `skill_id`、`operator_confirmed: true` 和实际 `rounds`；没有这份凭据时打包脚本会拒绝执行。
-3. 运行 `scripts/finalize.py <技术ID> --rounds <轮数>`。
-4. 运行 `scripts/progress.py complete <技术ID> --rounds <轮数>`。
-5. 交付最终 `SKILL.md`、可合入定义、基线差异和验证结果的可点击路径。
-6. 明确说明回收包不会自动上线，工程仍需按 source-map 回写真实源文件、真模型复测并走 PR。
-7. 提醒操盘手新建对话并发送“开始调试下一个 Skill”。
+1. 重新展示“当前调试”卡，确认本次收口对象没有变化。
+2. 再次运行 `skill_guard.py`。
+3. 把确认写入 `tuning-records/<技术ID>/acceptance.json`，字段必须为当前 `skill_id`、`operator_confirmed: true` 和实际 `rounds`；没有这份凭据时打包脚本会拒绝执行。
+4. 运行 `scripts/finalize.py <技术ID> --rounds <轮数>`。
+5. 运行 `scripts/progress.py complete <技术ID> --rounds <轮数>`。
+6. 交付最终 `SKILL.md`、可合入定义、基线差异和验证结果的可点击路径。
+7. 明确说明回收包不会自动上线，工程仍需按 source-map 回写真实源文件、真模型复测并走 PR。
+8. 提醒操盘手新建对话并发送“开始调试下一个 Skill”。
 
 不得自行宣布满意、自动完成当前 Skill 或自动进入下一项。

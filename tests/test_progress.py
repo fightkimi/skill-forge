@@ -31,8 +31,32 @@ class ProgressTest(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory(prefix="skill-progress-test-")
         self.state_path = Path(self.temp_dir.name) / "progress.json"
         self.order = [
-            {"order": 1, "skill_id": "skill-a", "mode": "tune", "name": "A"},
-            {"order": 2, "skill_id": "skill-b", "mode": "review", "name": "B"},
+            {
+                "order": 1,
+                "phase": 1,
+                "phase_name": "建档",
+                "skill_id": "skill-a",
+                "mode": "tune",
+                "name": "A",
+                "purpose": "先生成档案候选",
+                "depends_on": [],
+                "consumes_outputs_from": [],
+                "selection_reason": "这是工作流起点。",
+                "output_label": "档案候选",
+            },
+            {
+                "order": 2,
+                "phase": 2,
+                "phase_name": "策略",
+                "skill_id": "skill-b",
+                "mode": "review",
+                "name": "B",
+                "purpose": "承接档案生成策略",
+                "depends_on": ["skill-a"],
+                "consumes_outputs_from": ["skill-a"],
+                "selection_reason": "档案确认后才能进入策略。",
+                "output_label": "策略建议",
+            },
         ]
 
     def tearDown(self):
@@ -160,7 +184,7 @@ class ProgressTest(unittest.TestCase):
         state = self.progress.load_or_initialize(self.state_path, self.order)
         self.assertEqual("skill-a", self.progress.next_item(state, self.order)["skill_id"])
 
-        self.progress.mark_started(state, "skill-a")
+        self.progress.mark_started(state, self.order, "skill-a")
         self.progress.save_state(self.state_path, state)
         reloaded = json.loads(self.state_path.read_text(encoding="utf-8"))
         self.assertEqual("in_progress", reloaded["skills"]["skill-a"]["status"])
@@ -171,9 +195,93 @@ class ProgressTest(unittest.TestCase):
 
     def test_cannot_start_two_skills_at_once(self):
         state = self.progress.load_or_initialize(self.state_path, self.order)
-        self.progress.mark_started(state, "skill-a")
+        self.progress.mark_started(state, self.order, "skill-a")
         with self.assertRaises(ValueError):
-            self.progress.mark_started(state, "skill-b")
+            self.progress.mark_started(state, self.order, "skill-b")
+
+    def test_cannot_complete_skill_that_is_not_active(self):
+        state = self.progress.load_or_initialize(self.state_path, self.order)
+
+        with self.assertRaisesRegex(ValueError, "当前正在调试"):
+            self.progress.mark_completed(state, "skill-a", 1)
+
+    def test_completion_requires_confirmed_current_output(self):
+        state = self.progress.load_or_initialize(self.state_path, self.order)
+        self.progress.mark_started(state, self.order, "skill-a")
+
+        with self.assertRaisesRegex(ValueError, "已确认输出"):
+            self.progress.mark_completed(
+                state,
+                "skill-a",
+                1,
+                records_root=Path(self.temp_dir.name) / "tuning-records",
+            )
+
+    def test_cannot_start_skill_before_dependencies_are_completed(self):
+        state = self.progress.load_or_initialize(self.state_path, self.order)
+
+        with self.assertRaisesRegex(ValueError, "A"):
+            self.progress.mark_started(state, self.order, "skill-b")
+
+    def test_current_card_explains_identity_reason_and_upstream(self):
+        state = self.progress.load_or_initialize(self.state_path, self.order)
+        self.progress.mark_started(state, self.order, "skill-a")
+        self.progress.mark_completed(state, "skill-a", 2)
+        self.progress.mark_started(state, self.order, "skill-b")
+
+        card = self.progress.current_card(state, self.order)
+
+        self.assertEqual("第 2/2 个 · B", card["display_title"])
+        self.assertEqual("档案确认后才能进入策略。", card["selection_reason"])
+        self.assertEqual("策略建议", card["output_label"])
+        self.assertEqual("A", card["dependencies"][0]["name"])
+        self.assertEqual("completed", card["dependencies"][0]["status"])
+        self.assertEqual(
+            "tuning-records/skill-a/round-02-output.md",
+            card["upstream_outputs"][0]["path"],
+        )
+
+    def test_start_blocks_when_required_upstream_output_is_missing(self):
+        state = self.progress.load_or_initialize(self.state_path, self.order)
+        self.progress.mark_started(state, self.order, "skill-a")
+        self.progress.mark_completed(state, "skill-a", 1)
+        records_root = Path(self.temp_dir.name) / "tuning-records"
+
+        with self.assertRaisesRegex(ValueError, "已确认输出"):
+            self.progress.mark_started(
+                state,
+                self.order,
+                "skill-b",
+                records_root=records_root,
+            )
+
+    def test_start_accepts_verified_upstream_output(self):
+        state = self.progress.load_or_initialize(self.state_path, self.order)
+        self.progress.mark_started(state, self.order, "skill-a")
+        self.progress.mark_completed(state, "skill-a", 1)
+        records_root = Path(self.temp_dir.name) / "tuning-records"
+        upstream = records_root / "skill-a"
+        upstream.mkdir(parents=True)
+        (upstream / "acceptance.json").write_text(
+            json.dumps(
+                {
+                    "skill_id": "skill-a",
+                    "operator_confirmed": True,
+                    "rounds": 1,
+                }
+            ),
+            encoding="utf-8",
+        )
+        (upstream / "round-01-output.md").write_text("已确认档案", encoding="utf-8")
+
+        self.progress.mark_started(
+            state,
+            self.order,
+            "skill-b",
+            records_root=records_root,
+        )
+
+        self.assertEqual("skill-b", state["active_skill"])
 
 
 if __name__ == "__main__":
