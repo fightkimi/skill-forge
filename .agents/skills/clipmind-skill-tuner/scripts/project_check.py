@@ -12,7 +12,8 @@ from skill_guard import END, START, validate_skill_dir
 
 
 EXPECTED_TYPES = {"agent": 57, "prompt": 40, "governance": 27, "image": 22}
-EXPECTED_MODES = {"tune": 88, "visual_tune": 22, "component_tune": 9, "review_only": 27}
+EXPECTED_OPERATOR_COUNT = 32
+EXPECTED_OPTIONAL_COUNT = 7
 REQUIRED_FILES = (
     "SKILL.md",
     "agents/openai.yaml",
@@ -27,8 +28,9 @@ def run_checks(root: Path) -> list[str]:
     errors: list[str] = []
     inventory_path = root / "inventory/skills.json"
     order_path = root / "inventory/tuning-order.json"
-    if not inventory_path.exists() or not order_path.exists():
-        return ["缺少 inventory/skills.json 或 inventory/tuning-order.json"]
+    optional_path = root / "inventory/optional-copy-skills.json"
+    if not inventory_path.exists() or not order_path.exists() or not optional_path.exists():
+        return ["缺少 inventory/skills.json、tuning-order.json 或 optional-copy-skills.json"]
 
     inventory = json.loads(inventory_path.read_text(encoding="utf-8"))["skills"]
     type_counts = Counter(item["类型"] for item in inventory)
@@ -37,10 +39,18 @@ def run_checks(root: Path) -> list[str]:
 
     order = json.loads(order_path.read_text(encoding="utf-8"))["skills"]
     mode_counts = Counter(item["mode"] for item in order)
-    if len(order) != 146 or dict(mode_counts) != EXPECTED_MODES:
-        errors.append(f"调试队列不符：总数 {len(order)}，模式 {dict(mode_counts)}")
-    if {item["skill_id"] for item in order} != {item["技术ID"] for item in inventory}:
-        errors.append("调试队列与导出清单的 Skill 集合不一致")
+    optional = json.loads(optional_path.read_text(encoding="utf-8"))["skills"]
+    inventory_ids = {item["技术ID"] for item in inventory}
+    order_ids = {item["skill_id"] for item in order}
+    optional_ids = {item["skill_id"] for item in optional}
+    if len(order) != EXPECTED_OPERATOR_COUNT or dict(mode_counts) != {"tune": EXPECTED_OPERATOR_COUNT}:
+        errors.append(f"操盘手文案调试队列不符：总数 {len(order)}，模式 {dict(mode_counts)}")
+    if len(optional) != EXPECTED_OPTIONAL_COUNT:
+        errors.append(f"按需文案 Skill 数量不符：{len(optional)}")
+    if not order_ids.issubset(inventory_ids) or not optional_ids.issubset(inventory_ids):
+        errors.append("操盘手清单包含未导出的 Skill")
+    if not order_ids.isdisjoint(optional_ids):
+        errors.append("默认调试队列与按需文案清单发生重叠")
 
     for item in inventory:
         skill_id = item["技术ID"]
@@ -72,7 +82,7 @@ def main() -> int:
         for error in errors:
             print(f"- {error}")
         return 1
-    print("PASS：146 个 Skill、业务调试顺序、不可修改边界和引导 Skill 均通过检查。")
+    print("PASS：146 个运输 Skill、32 个操盘手文案 Skill、不可修改边界和引导 Skill 均通过检查。")
     return 0
 
 
