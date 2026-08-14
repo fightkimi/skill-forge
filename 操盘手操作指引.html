@@ -77,6 +77,11 @@
     .step-box{margin:24px 0;padding:24px;border:1px solid var(--line);background:var(--paper)}
     .step-box h3{margin:0 0 8px;font-family:var(--font-display);font-size:1.35rem;line-height:1.35}
     .step-box p{margin:0;color:var(--muted)}
+    .skill-card{margin:26px 0;padding:22px;border:1px solid var(--line);border-left:4px solid #4e7089;background:var(--paper)}
+    .skill-card-label{color:#4e7089;font:800 .66rem/1.5 var(--font-code);letter-spacing:.1em;text-transform:uppercase}
+    .skill-card h3{margin:10px 0 14px;font-family:var(--font-display);font-size:1.45rem;line-height:1.35}
+    .skill-card dl{display:grid;grid-template-columns:118px minmax(0,1fr);gap:8px 14px;margin:0;font-size:.84rem;line-height:1.65}
+    .skill-card dt{color:var(--faint);font-weight:750}.skill-card dd{margin:0;color:var(--ink-2)}
     .path{display:block;margin-top:16px;padding:15px 17px;border:1px solid var(--line);background:var(--paper-deep);color:var(--ink);font:700 .84rem/1.6 var(--font-code);word-break:break-all}
     .plain-list{display:grid;gap:9px;margin:22px 0 0;padding:0;list-style:none}
     .plain-list li{display:grid;grid-template-columns:26px 1fr;gap:8px;color:var(--ink-2)}
@@ -122,7 +127,7 @@
       body{font-size:15px}.shell{width:min(calc(100% - 28px),var(--content-width))}.hero{padding-top:20px}.hero h1{font-size:clamp(2.2rem,11vw,3.15rem)}
       .hero-rule{grid-template-columns:1fr;gap:7px}.overview-grid{grid-template-columns:1fr 1fr}.overview-item:nth-child(3){border-inline-start:0}.overview-item:nth-child(n+3){border-top:1px solid var(--line)}
       .section{padding-block:52px}.section-head{grid-template-columns:1fr;gap:8px}.chapter-index{padding:0}.section h2{font-size:clamp(1.9rem,9vw,2.55rem)}
-      .command{padding:20px 20px 64px}.copy{right:14px;top:auto;bottom:14px}.result-grid,.faq{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.flow-arrow{transform:rotate(90deg);text-align:center}.tools{left:10px}.tool{flex:1;min-height:44px}
+      .command{padding:20px 20px 64px}.copy{right:14px;top:auto;bottom:14px}.result-grid,.faq{grid-template-columns:1fr}.skill-card dl{grid-template-columns:1fr;gap:2px}.skill-card dd{margin-bottom:8px}.flow{grid-template-columns:1fr}.flow-arrow{transform:rotate(90deg);text-align:center}.tools{left:10px}.tool{flex:1;min-height:44px}
     }
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toast{transition:none}}
     @media print{@page{size:A4;margin:14mm}body{background:var(--paper);font-size:10.5pt}body::before,.rail,.tools,.reading-progress,.skip,.copy,.toast{display:none!important}.shell{display:block;width:100%}.document{max-width:none;padding:0}.section{break-before:page;padding-block:18mm 0}.hero{min-height:245mm;display:grid;align-content:center;page-break-after:always}.result,.step-box,.boundary{break-inside:avoid}}
@@ -156,7 +161,7 @@
       <header class="hero" id="top">
         <div class="kicker">Quick Start · 简单操作指南</div>
         <h1>调 Skill，<br>只做四件事</h1>
-        <p class="hero-subtitle">项目已内置赵玥玥 MOCK 演练资料。Codex 会从 32 个纯文案 Skill 中按顺序一次调一个，你只需要看结果，然后告诉它“OK”或“哪里不OK”。</p>
+        <p class="hero-subtitle">项目已内置小月 MOCK 演练资料。Codex 会从 32 个纯文案 Skill 中按业务依赖一次调一个，并持续告诉你当前正在调什么；你只需要看结果，然后告诉它“OK”或“哪里不OK”。</p>
         <div class="hero-rule">
           <div class="hero-rule-label">唯一规则</div>
           <strong>每个 Skill 单独开一个 Codex 对话；全程只使用同一套 IP 材料。</strong>
@@ -166,7 +171,7 @@
       <section class="overview" aria-label="四步总览">
         <div class="overview-label">四步完成一次调试</div>
         <div class="overview-grid">
-          <div class="overview-item"><div class="overview-n">01</div><div class="overview-kind">用演练资料</div><div class="overview-desc">Codex 自动装载赵玥玥合成 IP，不需要上传。</div></div>
+          <div class="overview-item"><div class="overview-n">01</div><div class="overview-kind">用演练资料</div><div class="overview-desc">Codex 自动装载小月合成 IP，不需要上传。</div></div>
           <div class="overview-item"><div class="overview-n">02</div><div class="overview-kind">开对话</div><div class="overview-desc">复制一句开始口令，Codex 自动找 Skill。</div></div>
           <div class="overview-item"><div class="overview-n">03</div><div class="overview-kind">给反馈</div><div class="overview-desc">只说结果哪里好、哪里不对。</div></div>
           <div class="overview-item"><div class="overview-n">04</div><div class="overview-kind">确认完成</div><div class="overview-desc">确认 OK，拿到最终 Skill，再开下一个。</div></div>
@@ -175,10 +180,10 @@
 
       <section class="section" id="step-1">
         <div class="section-head"><div class="chapter-index">01 / 04</div><div><div class="chapter-label">Prepare</div><h2>直接使用内置演练资料</h2></div></div>
-        <p class="lead">打开项目后不需要导入资料。第一次初始化时，Codex 会自动装载赵玥玥的 MOCK 建档、访谈、产品、用户、案例、语料和内容数据。</p>
+        <p class="lead">打开项目后不需要导入资料。第一次初始化时，Codex 会自动装载小月的 MOCK 资料包：两轮人物深访、12 组用户访谈、24 条评论/私信、5 个正反案例、完整表达语料、12 份历史内容样本、24 条合成表现数据、六周计划和 36 个候选选题。</p>
         <div class="step-box">
           <h3>默认演练 IP</h3>
-          <span class="path">fixtures / ip / 赵玥玥 /</span>
+          <span class="path">fixtures / ip / 小月 /</span>
           <ul class="plain-list">
             <li>所有资料都明确标注为 MOCK，不对应真实个人。</li>
             <li>每个 Skill 都已经绑定固定任务和材料。</li>
@@ -190,18 +195,30 @@
 
       <section class="section" id="step-2">
         <div class="section-head"><div class="chapter-index">02 / 04</div><div><div class="chapter-label">Start</div><h2>新建对话，复制一句话</h2></div></div>
-        <p class="lead">用 Codex 打开整个项目，新建一个对话，把下面这句话发出去。Codex 会自动装载演练资料并开始第一个文案 Skill。</p>
-        <div class="command" id="first-command">请阅读《开始调试.md》，使用赵玥玥演练资料开始第一个文案 Skill。<button class="copy" type="button" data-copy="first-command">复制这句话</button></div>
+        <p class="lead">用 Codex 打开整个项目，新建一个对话，把下面这句话发出去。Codex 会先检查上游是否已确认，再选择当前唯一可调的文案 Skill。</p>
+        <div class="command" id="first-command">请阅读《开始调试.md》，使用小月演练资料开始第一个文案 Skill。<button class="copy" type="button" data-copy="first-command">复制这句话</button></div>
         <ul class="plain-list">
           <li>不用选择 Skill。</li>
           <li>不用复制技术 ID。</li>
           <li>不用告诉 Codex 调试顺序。</li>
         </ul>
+        <div class="skill-card" aria-label="当前 Skill 展示示例">
+          <div class="skill-card-label">当前调试 · 第 12 / 32 个</div>
+          <h3>内容策略建议</h3>
+          <dl>
+            <dt>技术 ID</dt><dd>clipmind-sop-ip-s03-strategy-suggestion</dd>
+            <dt>所在环节</dt><dd>策略、计划与选题</dd>
+            <dt>为什么现在调</dt><dd>档案、业务诊断、语言风格、用户洞察和发展阶段都已确认，现在才能形成内容策略基线。</dd>
+            <dt>承接产物</dt><dd>IP 档案草稿、业务诊断结论、语言风格卡、用户画像、痛点地图、阶段判断与六周目标。</dd>
+            <dt>本轮产出</dt><dd>内容策略基线。</dd>
+          </dl>
+        </div>
+        <div class="boundary"><h3>每一轮都会重复显示</h3><p>首轮生成、收到不OK、修改后复跑和最终确认时，回复开头都会保留这张“当前调试”卡，避免反馈串到别的 Skill。</p></div>
       </section>
 
       <section class="section" id="step-3">
         <div class="section-head"><div class="chapter-index">03 / 04</div><div><div class="chapter-label">Feedback</div><h2>看结果，只回复 OK 或不OK</h2></div></div>
-        <p class="lead">Codex 输出内容后，会给你两个选项。你只需要判断内容是否达到业务预期。</p>
+        <p class="lead">Codex 会先再次显示当前 Skill，再输出内容和两个选项。你只需要判断这一个 Skill 的结果是否达到业务预期。</p>
         <div class="result-grid">
           <article class="result ok">
             <div class="result-label">结果符合预期</div>
@@ -235,9 +252,10 @@
       <section class="section" id="faq">
         <div class="section-head"><div class="chapter-index">FAQ</div><div><div class="chapter-label">Questions</div><h2>常见问题</h2></div></div>
         <div class="faq">
-          <article class="faq-item"><h3>需要自己挑 Skill 吗？</h3><p>不需要。Codex 会按 ClipMind 业务顺序自动找下一项。</p></article>
+          <article class="faq-item"><h3>需要自己挑 Skill 吗？</h3><p>不需要。Codex 会检查依赖，只选择上游已经确认的下一项，并解释为什么现在轮到它。</p></article>
+          <article class="faq-item"><h3>下游会用上一步的结果吗？</h3><p>会，但只读取清单明确声明的上游最终输出；未确认的草稿、无关 Skill 和其他客户材料不会混入。</p></article>
           <article class="faq-item"><h3>反馈后要再说“修改 Skill”吗？</h3><p>不需要。回复“不OK：修改意见”就代表允许它校正当前 Skill。</p></article>
-          <article class="faq-item"><h3>赵玥玥是真实人物吗？</h3><p>不是。她是项目内置的合成演练 IP；资料可进入 Git，但不得用于外部宣传。运行副本、私有材料、调试记录和回收包默认被忽略。</p></article>
+          <article class="faq-item"><h3>小月是真实人物吗？</h3><p>不是。她是项目内置的合成演练 IP；资料可进入 Git，但不得用于外部宣传。运行副本、私有材料、调试记录和回收包默认被忽略。</p></article>
           <article class="faq-item"><h3>确认 OK 后会直接上线吗？</h3><p>不会。最终 Skill 仍需开发按来源映射复测并人工合入 ClipMind。</p></article>
         </div>
       </section>

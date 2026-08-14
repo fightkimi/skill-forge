@@ -10,15 +10,15 @@
     },
     {
       "phase": 2,
-      "name": "策略与内容计划"
+      "name": "用户洞察与阶段判断"
     },
     {
       "phase": 3,
-      "name": "研究、素材与用户洞察"
+      "name": "策略、计划与选题"
     },
     {
       "phase": 4,
-      "name": "爆款拆解与选题"
+      "name": "平台策略与选题适配"
     },
     {
       "phase": 5,
@@ -37,6 +37,10 @@
       "source_id": "ip/s01_profile_extract",
       "category": "客户建档",
       "purpose": "把建档资料作为证据包,提炼 8 个核心档案维度的字段级建议(终点身份铁律)。",
+      "depends_on": [],
+      "consumes_outputs_from": [],
+      "selection_reason": "先把原始材料变成有证据的档案字段，后续档案、诊断和策略都以它为起点。",
+      "output_label": "8 维档案候选",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 1
     },
@@ -51,6 +55,14 @@
       "source_id": "ip/s01_profile_extract_aux",
       "category": "IP 档案与策略",
       "purpose": "从补充材料中提炼可进入 IP 档案的候选信息，标明来源、置信度、冲突和待确认项。",
+      "depends_on": [
+        "clipmind-sop-ip-s01-profile-extract"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s01-profile-extract"
+      ],
+      "selection_reason": "主档案候选完成后，再用案例与内容表现补证并检查冲突。",
+      "output_label": "补充档案候选与冲突清单",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 2
     },
@@ -65,6 +77,16 @@
       "source_id": "ip/s01_profile_draft",
       "category": "客户建档",
       "purpose": "基于真实资料生成贴合当前 IP 的档案草稿,保留人工确认边界。",
+      "depends_on": [
+        "clipmind-sop-ip-s01-profile-extract",
+        "clipmind-sop-ip-s01-profile-extract-aux"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s01-profile-extract",
+        "clipmind-sop-ip-s01-profile-extract-aux"
+      ],
+      "selection_reason": "主提炼和辅助提炼都确认后，才能合成一份可供人工确认的档案草稿。",
+      "output_label": "IP 档案草稿",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 3
     },
@@ -79,6 +101,14 @@
       "source_id": "ip/s01_5_ip_breakdown",
       "category": "客户建档",
       "purpose": "按经历/结果/代价/判断/方法/案例/性格/稀缺性拆解 IP 内容素材。",
+      "depends_on": [
+        "clipmind-sop-ip-s01-profile-draft"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s01-profile-draft"
+      ],
+      "selection_reason": "档案草稿提供身份与经历基线，确认后才能进一步拆解内容资产。",
+      "output_label": "IP 8 维内容资产",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 4
     },
@@ -93,6 +123,16 @@
       "source_id": "ip/s02_diagnosis",
       "category": "客户建档",
       "purpose": "拆解业务阶段/核心卡点/定位三问/产品阶梯,基于资料原文证据。",
+      "depends_on": [
+        "clipmind-sop-ip-s01-profile-draft",
+        "clipmind-sop-ip-s01-5-ip-breakdown"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s01-profile-draft",
+        "clipmind-sop-ip-s01-5-ip-breakdown"
+      ],
+      "selection_reason": "先确认 IP 档案和内容资产，再判断业务阶段、核心卡点与定位问题。",
+      "output_label": "业务诊断结论",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 5
     },
@@ -107,69 +147,21 @@
       "source_id": "ip/s_language_extract",
       "category": "IP 档案与策略",
       "purpose": "从真实表达材料中提炼 IP 的语气、句式、常用词、禁用表达和可复用原话示例。",
+      "depends_on": [
+        "clipmind-sop-ip-s01-profile-draft"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s01-profile-draft"
+      ],
+      "selection_reason": "身份档案确认后，再从表达样本中抽出可复用的语言风格规则。",
+      "output_label": "IP 语言风格卡",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 6
     },
     {
       "order": 7,
-      "phase": 1,
-      "phase_name": "IP 建档与定位基线",
-      "mode": "tune",
-      "skill_id": "clipmind-sop-ip-s03-stage-advice",
-      "name": "IP 发展阶段建议",
-      "source_type": "prompt",
-      "source_id": "ip/s03_stage_advice",
-      "category": "IP 档案与策略",
-      "purpose": "根据已确认档案、内容表现和业务现状判断 IP 所处阶段，并给出阶段目标与下一步建议。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 7
-    },
-    {
-      "order": 8,
       "phase": 2,
-      "phase_name": "策略与内容计划",
-      "mode": "tune",
-      "skill_id": "clipmind-sop-ip-s03-strategy-suggestion",
-      "name": "内容策略建议",
-      "source_type": "prompt",
-      "source_id": "ip/s03_strategy_suggestion",
-      "category": "内容策略",
-      "purpose": "承接当前 IP 定位、购买/信任理由与风险边界,给本轮策略。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 8
-    },
-    {
-      "order": 9,
-      "phase": 2,
-      "phase_name": "策略与内容计划",
-      "mode": "tune",
-      "skill_id": "clipmind-sop-ip-s04-content-plan-suggestion",
-      "name": "内容计划建议",
-      "source_type": "prompt",
-      "source_id": "ip/s04_content_plan_suggestion",
-      "category": "内容计划",
-      "purpose": "结合 IP、平台方向与来源证据,产出阶段计划而非泛化周计划。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 9
-    },
-    {
-      "order": 10,
-      "phase": 2,
-      "phase_name": "策略与内容计划",
-      "mode": "tune",
-      "skill_id": "clipmind-sop-ip-s04-content-topic-suggestion",
-      "name": "单条选题建议",
-      "source_type": "prompt",
-      "source_id": "ip/s04_content_topic_suggestion",
-      "category": "内容计划",
-      "purpose": "基于当前编辑阶段生成类型稳定、不重复且等待人工保存的一条选题候选。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 10
-    },
-    {
-      "order": 11,
-      "phase": 3,
-      "phase_name": "研究、素材与用户洞察",
+      "phase_name": "用户洞察与阶段判断",
       "mode": "tune",
       "skill_id": "clipmind-agent-user-persona-analysis",
       "name": "用户画像分析助手",
@@ -177,13 +169,21 @@
       "source_id": "user-persona-analysis",
       "category": "研究与洞察",
       "purpose": "从访谈、评论、成交记录或内容互动里整理用户画像。会输出用户层级、痛点、动机、消费能力、内容偏好和需要继续验证的问题。",
+      "depends_on": [
+        "clipmind-sop-ip-s01-profile-draft"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s01-profile-draft"
+      ],
+      "selection_reason": "IP 档案基线完成后转向用户侧验证，避免把 IP 自身视角直接当作用户事实。",
+      "output_label": "用户画像与待验证问题",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 17
     },
     {
-      "order": 12,
-      "phase": 3,
-      "phase_name": "研究、素材与用户洞察",
+      "order": 8,
+      "phase": 2,
+      "phase_name": "用户洞察与阶段判断",
       "mode": "tune",
       "skill_id": "clipmind-agent-pain-point-insight",
       "name": "用户痛点洞察助手",
@@ -191,27 +191,21 @@
       "source_id": "pain-point-insight",
       "category": "研究与洞察",
       "purpose": "从访谈、评论、社群记录或客户 brief 中提炼用户痛点。会区分显性问题、深层动机、情绪词、内容机会和需要继续访谈的问题。",
+      "depends_on": [
+        "clipmind-agent-user-persona-analysis"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-agent-user-persona-analysis"
+      ],
+      "selection_reason": "先确认服务谁，再判断这些人的显性问题、深层动机与内容机会。",
+      "output_label": "用户痛点地图",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 18
     },
     {
-      "order": 13,
-      "phase": 4,
-      "phase_name": "爆款拆解与选题",
-      "mode": "tune",
-      "skill_id": "clipmind-agent-emotion-breakdown",
-      "name": "情绪拆解助手",
-      "source_type": "agent",
-      "source_id": "emotion-breakdown",
-      "category": "爆款拆解",
-      "purpose": "拆解内容或用户反馈里的情绪触发点,识别焦虑、身份认同、希望、优越感、后悔等表达。需要文本样本和目标用户,会输出情绪地图和内容应用建议。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 28
-    },
-    {
-      "order": 14,
-      "phase": 4,
-      "phase_name": "爆款拆解与选题",
+      "order": 9,
+      "phase": 2,
+      "phase_name": "用户洞察与阶段判断",
       "mode": "tune",
       "skill_id": "clipmind-agent-comment-insight",
       "name": "评论区洞察助手",
@@ -219,41 +213,109 @@
       "source_id": "comment-insight",
       "category": "爆款拆解",
       "purpose": "从评论文本、私信摘要或社群反馈里提炼用户问题、情绪和转化信号。需要评论样本和内容背景,会输出高频问题、情绪词、选题机会和承接建议。",
+      "depends_on": [
+        "clipmind-agent-user-persona-analysis",
+        "clipmind-agent-pain-point-insight"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-agent-user-persona-analysis",
+        "clipmind-agent-pain-point-insight"
+      ],
+      "selection_reason": "用户画像和痛点框架确认后，再用评论与私信验证高频问题和转化信号。",
+      "output_label": "评论区问题与转化信号",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 32
     },
     {
-      "order": 15,
-      "phase": 4,
-      "phase_name": "爆款拆解与选题",
+      "order": 10,
+      "phase": 2,
+      "phase_name": "用户洞察与阶段判断",
       "mode": "tune",
-      "skill_id": "clipmind-agent-content-schedule-planner",
-      "name": "内容排期助手",
+      "skill_id": "clipmind-agent-emotion-breakdown",
+      "name": "情绪拆解助手",
       "source_type": "agent",
-      "source_id": "content-schedule-planner",
-      "category": "选题与计划",
-      "purpose": "把选题池、阶段目标和团队产能整理成内容周期建议。需要选题、平台和发布节奏,会输出周期安排、内容角色、生产优先级和人工确认点。",
+      "source_id": "emotion-breakdown",
+      "category": "爆款拆解",
+      "purpose": "拆解内容或用户反馈里的情绪触发点,识别焦虑、身份认同、希望、优越感、后悔等表达。需要文本样本和目标用户,会输出情绪地图和内容应用建议。",
+      "depends_on": [
+        "clipmind-agent-pain-point-insight",
+        "clipmind-agent-comment-insight"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-agent-pain-point-insight",
+        "clipmind-agent-comment-insight"
+      ],
+      "selection_reason": "先确认用户痛点和评论中的真实表达，再区分背后的情绪触发，避免做成标签堆砌。",
+      "output_label": "用户情绪地图",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 33
+      "source_order": 28
     },
     {
-      "order": 16,
-      "phase": 4,
-      "phase_name": "爆款拆解与选题",
+      "order": 11,
+      "phase": 2,
+      "phase_name": "用户洞察与阶段判断",
       "mode": "tune",
-      "skill_id": "clipmind-agent-content-matrix-planner",
-      "name": "内容矩阵规划助手",
-      "source_type": "agent",
-      "source_id": "content-matrix-planner",
-      "category": "选题与计划",
-      "purpose": "规划主号、矩阵号、栏目和内容分工。需要品牌目标、平台、人群和产能,会输出矩阵角色、内容分层、协作节奏和风险边界。",
+      "skill_id": "clipmind-sop-ip-s03-stage-advice",
+      "name": "IP 发展阶段建议",
+      "source_type": "prompt",
+      "source_id": "ip/s03_stage_advice",
+      "category": "IP 档案与策略",
+      "purpose": "根据已确认档案、内容表现和业务现状判断 IP 所处阶段，并给出阶段目标与下一步建议。",
+      "depends_on": [
+        "clipmind-sop-ip-s01-profile-draft",
+        "clipmind-sop-ip-s02-diagnosis",
+        "clipmind-agent-user-persona-analysis",
+        "clipmind-agent-pain-point-insight"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s01-profile-draft",
+        "clipmind-sop-ip-s02-diagnosis",
+        "clipmind-agent-user-persona-analysis",
+        "clipmind-agent-pain-point-insight"
+      ],
+      "selection_reason": "档案、业务诊断、用户画像和痛点都确认后，才能判断发展阶段与六周目标。",
+      "output_label": "阶段判断与六周目标",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 34
+      "source_order": 7
     },
     {
-      "order": 17,
-      "phase": 4,
-      "phase_name": "爆款拆解与选题",
+      "order": 12,
+      "phase": 3,
+      "phase_name": "策略、计划与选题",
+      "mode": "tune",
+      "skill_id": "clipmind-sop-ip-s03-strategy-suggestion",
+      "name": "内容策略建议",
+      "source_type": "prompt",
+      "source_id": "ip/s03_strategy_suggestion",
+      "category": "内容策略",
+      "purpose": "承接当前 IP 定位、购买/信任理由与风险边界,给本轮策略。",
+      "depends_on": [
+        "clipmind-sop-ip-s01-profile-draft",
+        "clipmind-sop-ip-s01-5-ip-breakdown",
+        "clipmind-sop-ip-s02-diagnosis",
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-user-persona-analysis",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-sop-ip-s03-stage-advice"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s01-profile-draft",
+        "clipmind-sop-ip-s01-5-ip-breakdown",
+        "clipmind-sop-ip-s02-diagnosis",
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-user-persona-analysis",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-sop-ip-s03-stage-advice"
+      ],
+      "selection_reason": "档案、业务诊断、语言风格、用户洞察和发展阶段都确认后，才形成内容策略基线。",
+      "output_label": "内容策略基线",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 8
+    },
+    {
+      "order": 13,
+      "phase": 3,
+      "phase_name": "策略、计划与选题",
       "mode": "tune",
       "skill_id": "clipmind-agent-content-gap-analysis",
       "name": "内容缺口分析助手",
@@ -261,13 +323,53 @@
       "source_id": "content-gap-analysis",
       "category": "选题与计划",
       "purpose": "对比用户痛点、已有内容、竞品和素材,找出当前内容体系缺少的主题和证据。需要内容清单或摘要,会输出缺口、优先级和补齐建议。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-agent-comment-insight",
+        "clipmind-sop-ip-s03-strategy-suggestion"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-agent-comment-insight",
+        "clipmind-sop-ip-s03-strategy-suggestion"
+      ],
+      "selection_reason": "用已确认策略、用户画像、痛点和评论信号对照历史内容，才能判断真正缺什么。",
+      "output_label": "内容缺口与补证优先级",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 35
     },
     {
-      "order": 18,
-      "phase": 4,
-      "phase_name": "爆款拆解与选题",
+      "order": 14,
+      "phase": 3,
+      "phase_name": "策略、计划与选题",
+      "mode": "tune",
+      "skill_id": "clipmind-sop-ip-s04-content-plan-suggestion",
+      "name": "内容计划建议",
+      "source_type": "prompt",
+      "source_id": "ip/s04_content_plan_suggestion",
+      "category": "内容计划",
+      "purpose": "结合 IP、平台方向与来源证据,产出阶段计划而非泛化周计划。",
+      "depends_on": [
+        "clipmind-sop-ip-s03-stage-advice",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-content-gap-analysis"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s03-stage-advice",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-content-gap-analysis"
+      ],
+      "selection_reason": "阶段目标、内容策略和内容缺口确认后，才能把策略转成可执行计划。",
+      "output_label": "两周内容计划",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 9
+    },
+    {
+      "order": 15,
+      "phase": 3,
+      "phase_name": "策略、计划与选题",
       "mode": "tune",
       "skill_id": "clipmind-agent-topic-planner",
       "name": "内容选题策划专家",
@@ -275,11 +377,217 @@
       "source_id": "topic-planner",
       "category": "选题与计划",
       "purpose": "围绕目标用户、痛点和阶段目标生成可进入内容计划的选题池。需要 IP 档案和素材缺口,会输出主题、标题方向、用户情绪、平台适配和拍摄准备。",
+      "depends_on": [
+        "clipmind-agent-pain-point-insight",
+        "clipmind-agent-comment-insight",
+        "clipmind-agent-emotion-breakdown",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-content-gap-analysis",
+        "clipmind-sop-ip-s04-content-plan-suggestion"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-agent-pain-point-insight",
+        "clipmind-agent-comment-insight",
+        "clipmind-agent-emotion-breakdown",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-content-gap-analysis",
+        "clipmind-sop-ip-s04-content-plan-suggestion"
+      ],
+      "selection_reason": "计划、痛点、情绪、评论信号和内容缺口都具备后，再生成可执行而非凑数的选题池。",
+      "output_label": "两周可执行选题池",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 36
     },
     {
+      "order": 16,
+      "phase": 3,
+      "phase_name": "策略、计划与选题",
+      "mode": "tune",
+      "skill_id": "clipmind-sop-ip-s04-content-topic-suggestion",
+      "name": "单条选题建议",
+      "source_type": "prompt",
+      "source_id": "ip/s04_content_topic_suggestion",
+      "category": "内容计划",
+      "purpose": "基于当前编辑阶段生成类型稳定、不重复且等待人工保存的一条选题候选。",
+      "depends_on": [
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-sop-ip-s04-content-plan-suggestion",
+        "clipmind-agent-topic-planner"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-sop-ip-s04-content-plan-suggestion",
+        "clipmind-agent-topic-planner"
+      ],
+      "selection_reason": "策略、计划和选题池确认后，再挑出一条最值得进入生产的选题。",
+      "output_label": "优先单条选题",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 10
+    },
+    {
+      "order": 17,
+      "phase": 3,
+      "phase_name": "策略、计划与选题",
+      "mode": "tune",
+      "skill_id": "clipmind-agent-content-schedule-planner",
+      "name": "内容排期助手",
+      "source_type": "agent",
+      "source_id": "content-schedule-planner",
+      "category": "选题与计划",
+      "purpose": "把选题池、阶段目标和团队产能整理成内容周期建议。需要选题、平台和发布节奏,会输出周期安排、内容角色、生产优先级和人工确认点。",
+      "depends_on": [
+        "clipmind-sop-ip-s04-content-plan-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-sop-ip-s04-content-topic-suggestion"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s04-content-plan-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-sop-ip-s04-content-topic-suggestion"
+      ],
+      "selection_reason": "计划、选题池和优先选题都确认后，才能结合真实产能形成排期。",
+      "output_label": "两周内容排期",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 33
+    },
+    {
+      "order": 18,
+      "phase": 3,
+      "phase_name": "策略、计划与选题",
+      "mode": "tune",
+      "skill_id": "clipmind-agent-content-matrix-planner",
+      "name": "内容矩阵规划助手",
+      "source_type": "agent",
+      "source_id": "content-matrix-planner",
+      "category": "选题与计划",
+      "purpose": "规划主号、矩阵号、栏目和内容分工。需要品牌目标、平台、人群和产能,会输出矩阵角色、内容分层、协作节奏和风险边界。",
+      "depends_on": [
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-sop-ip-s04-content-plan-suggestion",
+        "clipmind-agent-topic-planner"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-sop-ip-s04-content-plan-suggestion",
+        "clipmind-agent-topic-planner"
+      ],
+      "selection_reason": "策略、计划和选题池确认后，再判断当前产能能承受什么内容分层与矩阵。",
+      "output_label": "内容矩阵与分工建议",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 34
+    },
+    {
       "order": 19,
+      "phase": 4,
+      "phase_name": "平台策略与选题适配",
+      "mode": "tune",
+      "skill_id": "clipmind-agent-xhs-strategy",
+      "name": "小红书运营策略专家",
+      "source_type": "agent",
+      "source_id": "xhs-strategy",
+      "category": "图文与笔记",
+      "purpose": "围绕账号定位、目标用户、选题方向和笔记结构制定小红书运营建议。需要 IP 档案、历史内容或竞品线索,会输出栏目打法、增长动作和资料缺口。",
+      "depends_on": [
+        "clipmind-sop-ip-s01-profile-draft",
+        "clipmind-agent-user-persona-analysis",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-content-gap-analysis"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s01-profile-draft",
+        "clipmind-agent-user-persona-analysis",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-content-gap-analysis"
+      ],
+      "selection_reason": "先承接 IP、用户、总体策略和内容缺口，形成小红书平台策略，再进入平台选题与文案。",
+      "output_label": "小红书运营策略",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 45
+    },
+    {
+      "order": 20,
+      "phase": 4,
+      "phase_name": "平台策略与选题适配",
+      "mode": "tune",
+      "skill_id": "clipmind-agent-xhs-topic-inspiration",
+      "name": "小红书选题灵感助手",
+      "source_type": "agent",
+      "source_id": "xhs-topic-inspiration",
+      "category": "图文与笔记",
+      "purpose": "从用户痛点、平台热点、账号定位和素材线索里生成小红书选题灵感。适合扩充笔记题库,会给出选题角度、标题方向、素材需求和适合验证的用户情绪。",
+      "depends_on": [
+        "clipmind-agent-topic-planner",
+        "clipmind-agent-xhs-strategy"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-agent-topic-planner",
+        "clipmind-agent-xhs-strategy"
+      ],
+      "selection_reason": "通用选题池和小红书策略确认后，再扩展平台专属选题，避免热点与账号定位脱节。",
+      "output_label": "小红书选题灵感池",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 46
+    },
+    {
+      "order": 21,
+      "phase": 4,
+      "phase_name": "平台策略与选题适配",
+      "mode": "tune",
+      "skill_id": "clipmind-agent-xhs-graphic-note",
+      "name": "小红书图文生成助手",
+      "source_type": "agent",
+      "source_id": "xhs-graphic-note",
+      "category": "图文与笔记",
+      "purpose": "把主题、目标用户和素材线索整理成一篇小红书图文笔记方案。会给出封面标题、6-10 页分镜、正文、话题标签和素材清单,适合从想法快速进入可拍可排的草案。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-xhs-strategy",
+        "clipmind-agent-xhs-topic-inspiration"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-xhs-strategy",
+        "clipmind-agent-xhs-topic-inspiration"
+      ],
+      "selection_reason": "小红书策略和平台选题确认后，再验证图文文案能否正确落地。",
+      "output_label": "小红书图文文案",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 43
+    },
+    {
+      "order": 22,
+      "phase": 4,
+      "phase_name": "平台策略与选题适配",
+      "mode": "tune",
+      "skill_id": "clipmind-agent-short-video-strategy",
+      "name": "短视频内容策略专家",
+      "source_type": "agent",
+      "source_id": "short-video-strategy",
+      "category": "短视频脚本",
+      "purpose": "把 IP 定位、用户痛点和平台节奏转成短视频内容打法。需要阶段目标、用户问题和可拍素材,会产出内容主张、栏目矩阵、脚本方向和素材优先级。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-content-gap-analysis",
+        "clipmind-agent-topic-planner"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-content-gap-analysis",
+        "clipmind-agent-topic-planner"
+      ],
+      "selection_reason": "先承接语言、用户痛点、总体策略、内容缺口和选题池，形成短视频生产打法。",
+      "output_label": "短视频六周打法",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 49
+    },
+    {
+      "order": 23,
       "phase": 5,
       "phase_name": "内容生产与表达",
       "mode": "tune",
@@ -289,53 +597,27 @@
       "source_id": "production/s06_5_script",
       "category": "内容生产",
       "purpose": "用爆款结构+平台表达产出脚本,保留人工审稿。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-sop-ip-s04-content-topic-suggestion",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-sop-ip-s04-content-topic-suggestion",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "selection_reason": "语言、总体策略、选题和短视频打法都确认后，才进入第一条完整拍摄脚本。",
+      "output_label": "拍摄脚本草案",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 39
     },
     {
-      "order": 20,
-      "phase": 5,
-      "phase_name": "内容生产与表达",
-      "mode": "tune",
-      "skill_id": "clipmind-agent-xhs-graphic-note",
-      "name": "小红书图文生成助手",
-      "source_type": "agent",
-      "source_id": "xhs-graphic-note",
-      "category": "图文与笔记",
-      "purpose": "把主题、目标用户和素材线索整理成一篇小红书图文笔记方案。会给出封面标题、6-10 页分镜、正文、话题标签和素材清单,适合从想法快速进入可拍可排的草案。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 43
-    },
-    {
-      "order": 21,
-      "phase": 5,
-      "phase_name": "内容生产与表达",
-      "mode": "tune",
-      "skill_id": "clipmind-agent-xhs-strategy",
-      "name": "小红书运营策略专家",
-      "source_type": "agent",
-      "source_id": "xhs-strategy",
-      "category": "图文与笔记",
-      "purpose": "围绕账号定位、目标用户、选题方向和笔记结构制定小红书运营建议。需要 IP 档案、历史内容或竞品线索,会输出栏目打法、增长动作和资料缺口。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 45
-    },
-    {
-      "order": 22,
-      "phase": 5,
-      "phase_name": "内容生产与表达",
-      "mode": "tune",
-      "skill_id": "clipmind-agent-xhs-topic-inspiration",
-      "name": "小红书选题灵感助手",
-      "source_type": "agent",
-      "source_id": "xhs-topic-inspiration",
-      "category": "图文与笔记",
-      "purpose": "从用户痛点、平台热点、账号定位和素材线索里生成小红书选题灵感。适合扩充笔记题库,会给出选题角度、标题方向、素材需求和适合验证的用户情绪。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 46
-    },
-    {
-      "order": 23,
+      "order": 24,
       "phase": 5,
       "phase_name": "内容生产与表达",
       "mode": "tune",
@@ -345,11 +627,25 @@
       "source_id": "bilibili-planner",
       "category": "短视频脚本",
       "purpose": "把专业主题策划成 B站中长视频内容。需要主题、受众基础和资料来源,会产出标题、分 P 结构、讲解重点、资料清单和互动设计。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "selection_reason": "沿用已确认语言、总体策略、选题池和短视频打法，验证 B 站中长视频分支。",
+      "output_label": "B站中长视频方案",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 47
     },
     {
-      "order": 24,
+      "order": 25,
       "phase": 5,
       "phase_name": "内容生产与表达",
       "mode": "tune",
@@ -359,39 +655,27 @@
       "source_id": "douyin-script",
       "category": "短视频脚本",
       "purpose": "把主题、目标用户和素材整理成适合抖音节奏的短视频脚本。会给出 3 秒开场、分段口播、画面建议、互动引导和人工审核点。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-sop-ip-s04-content-topic-suggestion",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-sop-ip-s04-content-topic-suggestion",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "selection_reason": "沿用已确认语言、总体策略、选题和短视频打法，验证抖音短节奏脚本分支。",
+      "output_label": "抖音短视频脚本",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 48
     },
     {
-      "order": 25,
-      "phase": 5,
-      "phase_name": "内容生产与表达",
-      "mode": "tune",
-      "skill_id": "clipmind-agent-short-video-strategy",
-      "name": "短视频内容策略专家",
-      "source_type": "agent",
-      "source_id": "short-video-strategy",
-      "category": "短视频脚本",
-      "purpose": "把 IP 定位、用户痛点和平台节奏转成短视频内容打法。需要阶段目标、用户问题和可拍素材,会产出内容主张、栏目矩阵、脚本方向和素材优先级。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 49
-    },
-    {
       "order": 26,
-      "phase": 5,
-      "phase_name": "内容生产与表达",
-      "mode": "tune",
-      "skill_id": "clipmind-agent-script-polish",
-      "name": "脚本与口播优化专家",
-      "source_type": "agent",
-      "source_id": "script-polish",
-      "category": "短视频脚本",
-      "purpose": "检查脚本结构、开头钩子、口语表达、证据和收口行动。需要原稿或 brief,会输出逐段修改建议、风险提醒和可直接人工改稿的候选文案。",
-      "test_policy": "同一 IP、同一任务、同一材料前后对比",
-      "source_order": 50
-    },
-    {
-      "order": 27,
       "phase": 5,
       "phase_name": "内容生产与表达",
       "mode": "tune",
@@ -401,11 +685,27 @@
       "source_id": "wechat-video-script",
       "category": "短视频脚本",
       "purpose": "围绕创始人或专家人设生成视频号脚本。需要人设定位、观点主题和客户场景,会输出更稳重可信的口播结构、故事切入和转化承接提醒。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-sop-ip-s04-content-topic-suggestion",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-topic-planner",
+        "clipmind-sop-ip-s04-content-topic-suggestion",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "selection_reason": "短视频总体打法确认后，再验证更稳重的视频号人设表达。",
+      "output_label": "视频号口播脚本",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 51
     },
     {
-      "order": 28,
+      "order": 27,
       "phase": 5,
       "phase_name": "内容生产与表达",
       "mode": "tune",
@@ -415,8 +715,46 @@
       "source_id": "longform-to-short-video",
       "category": "短视频脚本",
       "purpose": "把长文、文章摘要、直播纪要或课程笔记压缩成短视频脚本。需要原文重点、目标用户和平台,会输出短视频主线、开场钩子、分段口播和可拍素材建议。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-short-video-strategy"
+      ],
+      "selection_reason": "先确认 IP 语言和短视频打法，再检验长内容压缩时能否保留核心判断与证据边界。",
+      "output_label": "长文转短视频脚本",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 52
+    },
+    {
+      "order": 28,
+      "phase": 5,
+      "phase_name": "内容生产与表达",
+      "mode": "tune",
+      "skill_id": "clipmind-agent-script-polish",
+      "name": "脚本与口播优化专家",
+      "source_type": "agent",
+      "source_id": "script-polish",
+      "category": "短视频脚本",
+      "purpose": "检查脚本结构、开头钩子、口语表达、证据和收口行动。需要原稿或 brief,会输出逐段修改建议、风险提醒和可直接人工改稿的候选文案。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-production-s06-5-script",
+        "clipmind-agent-douyin-script",
+        "clipmind-agent-wechat-video-script"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-production-s06-5-script",
+        "clipmind-agent-douyin-script",
+        "clipmind-agent-wechat-video-script"
+      ],
+      "selection_reason": "已有语言规则和两类脚本样稿后，才能判断润色是否真正改善表达而不改坏事实。",
+      "output_label": "优化后的脚本与改动说明",
+      "test_policy": "同一 IP、同一任务、同一材料前后对比",
+      "source_order": 50
     },
     {
       "order": 29,
@@ -429,6 +767,18 @@
       "source_id": "content-rewrite-polish",
       "category": "表达与改写",
       "purpose": "把已有文案、脚本或笔记改写成更清楚、更口语或更适合平台的版本。需要原文和目标风格,会输出改写稿、保留点、改动说明和风险表达。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-production-s06-5-script",
+        "clipmind-agent-script-polish"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-production-s06-5-script",
+        "clipmind-agent-script-polish"
+      ],
+      "selection_reason": "语言规则和完整脚本都确认后，再判断改写能否提升表达且保留原判断。",
+      "output_label": "改写稿与改动说明",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 53
     },
@@ -443,6 +793,22 @@
       "source_id": "multi-platform-rewrite",
       "category": "表达与改写",
       "purpose": "把同一段内容改写成小红书、抖音、视频号、公众号或朋友圈版本。需要原文、目标平台和边界,会输出不同平台的表达重点、标题和正文候选。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-xhs-strategy",
+        "clipmind-agent-short-video-strategy",
+        "clipmind-agent-content-rewrite-polish"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-sop-ip-s03-strategy-suggestion",
+        "clipmind-agent-xhs-strategy",
+        "clipmind-agent-short-video-strategy",
+        "clipmind-agent-content-rewrite-polish"
+      ],
+      "selection_reason": "先确认语言、策略和单篇改写原则，再扩展到多平台，避免只做表面换词。",
+      "output_label": "多平台改写版本",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 54
     },
@@ -457,6 +823,24 @@
       "source_id": "opening-hook-analysis",
       "category": "表达与改写",
       "purpose": "分析短视频、图文或直播开头是否能抓住用户。需要开头文本、平台和目标用户,会输出停留点、冲突点、替代钩子和风险提醒。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-sop-production-s06-5-script",
+        "clipmind-agent-douyin-script",
+        "clipmind-agent-wechat-video-script",
+        "clipmind-agent-script-polish"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-sop-production-s06-5-script",
+        "clipmind-agent-douyin-script",
+        "clipmind-agent-wechat-video-script",
+        "clipmind-agent-script-polish"
+      ],
+      "selection_reason": "有多类已确认脚本后，再横向判断什么样的开头真正抓人且不违背 IP 表达。",
+      "output_label": "开头钩子诊断与替代方案",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 55
     },
@@ -471,6 +855,22 @@
       "source_id": "title-hook-generator",
       "category": "表达与改写",
       "purpose": "为图文、短视频、直播或私域内容生成标题和开场钩子。需要主题、目标用户和平台,会输出多种角度版本、适用场景和夸大风险提醒。",
+      "depends_on": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-agent-emotion-breakdown",
+        "clipmind-agent-topic-planner",
+        "clipmind-agent-opening-hook-analysis"
+      ],
+      "consumes_outputs_from": [
+        "clipmind-sop-ip-s-language-extract",
+        "clipmind-agent-pain-point-insight",
+        "clipmind-agent-emotion-breakdown",
+        "clipmind-agent-topic-planner",
+        "clipmind-agent-opening-hook-analysis"
+      ],
+      "selection_reason": "最后综合语言、痛点、情绪、选题和钩子诊断，生成可跨内容形态使用的标题与开场库。",
+      "output_label": "标题与开场钩子库",
       "test_policy": "同一 IP、同一任务、同一材料前后对比",
       "source_order": 56
     }
