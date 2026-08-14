@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -37,23 +38,86 @@ FIXTURE_MARKDOWN_FILES = (
     "原始材料/07-内容表现数据.md",
     "原始材料/08-阶段目标与选题池.md",
 )
+MIN_FIXTURE_CHARACTERS = {
+    "README.md": 1500,
+    "MATERIALS.md": 1800,
+    "PROFILE.md": 3500,
+    "EVIDENCE-INDEX.md": 3500,
+    "原始材料/01-人物访谈.md": 3000,
+    "原始材料/02-业务与产品.md": 3500,
+    "原始材料/03-用户访谈与评论.md": 3500,
+    "原始材料/04-案例记录.md": 4500,
+    "原始材料/05-表达语料.md": 3500,
+    "原始材料/06-历史内容样本.md": 5000,
+    "原始材料/07-内容表现数据.md": 3500,
+    "原始材料/08-阶段目标与选题池.md": 4000,
+}
+FIXTURE_SERIES = {
+    "EVIDENCE-INDEX.md": (r"^\| XY-E(\d{2}) \|", {f"{index:02d}" for index in range(1, 36)}),
+    "原始材料/03-用户访谈与评论.md": (
+        r"^### U(\d{2})\｜",
+        {f"{index:02d}" for index in range(1, 13)},
+    ),
+    "原始材料/04-案例记录.md": (r"^## CASE-([A-E])\｜", set("ABCDE")),
+    "原始材料/06-历史内容样本.md": (
+        r"^## S(\d{2})\｜",
+        {f"{index:02d}" for index in range(1, 13)},
+    ),
+    "原始材料/07-内容表现数据.md": (
+        r"^\| D(\d{2}) \|",
+        {f"{index:02d}" for index in range(1, 25)},
+    ),
+}
 
 
 def check_builtin_fixture(root: Path, queue_ids: set[str]) -> list[str]:
     errors: list[str] = []
-    fixture = root / "fixtures/ip/赵玥玥"
+    fixture = root / "fixtures/ip/小月"
     for relative in FIXTURE_MARKDOWN_FILES:
         path = fixture / relative
         if not path.exists():
-            errors.append(f"内置赵玥玥演练资料缺少 {relative}")
+            errors.append(f"内置小月演练资料缺少 {relative}")
             continue
-        opening = "\n".join(path.read_text(encoding="utf-8").splitlines()[:4])
+        text = path.read_text(encoding="utf-8")
+        opening = "\n".join(text.splitlines()[:4])
         if "MOCK 合成演练数据" not in opening:
             errors.append(f"内置演练资料未声明 MOCK：{relative}")
+        if "小月" not in text:
+            errors.append(f"内置演练资料未使用小月显示名：{relative}")
+        if len(text.strip()) < MIN_FIXTURE_CHARACTERS[relative]:
+            errors.append(
+                f"内置小月演练资料过薄：{relative} "
+                f"（{len(text.strip())} < {MIN_FIXTURE_CHARACTERS[relative]} 字符）"
+            )
+        if relative in FIXTURE_SERIES:
+            pattern, expected = FIXTURE_SERIES[relative]
+            actual = set(re.findall(pattern, text, flags=re.MULTILINE))
+            if actual != expected:
+                errors.append(
+                    f"内置小月演练资料样本序列不完整：{relative} "
+                    f"（缺少 {sorted(expected - actual)}，多出 {sorted(actual - expected)}）"
+                )
+
+    evidence_path = fixture / "EVIDENCE-INDEX.md"
+    if evidence_path.exists():
+        evidence_text = evidence_path.read_text(encoding="utf-8")
+        defined_evidence = set(
+            re.findall(r"^\| (XY-E\d{2}) \|", evidence_text, flags=re.MULTILINE)
+        )
+        used_evidence: set[str] = set()
+        for relative in FIXTURE_MARKDOWN_FILES:
+            path = fixture / relative
+            if path.exists():
+                used_evidence.update(
+                    re.findall(r"XY-E\d{2}", path.read_text(encoding="utf-8"))
+                )
+        undefined_evidence = used_evidence - defined_evidence
+        if undefined_evidence:
+            errors.append(f"内置小月演练资料引用了未定义证据：{sorted(undefined_evidence)}")
 
     scenarios_path = fixture / "scenarios.json"
     if not scenarios_path.exists():
-        errors.append("内置赵玥玥演练资料缺少 scenarios.json")
+        errors.append("内置小月演练资料缺少 scenarios.json")
         return errors
     try:
         scenarios = json.loads(scenarios_path.read_text(encoding="utf-8"))
@@ -62,6 +126,10 @@ def check_builtin_fixture(root: Path, queue_ids: set[str]) -> list[str]:
         return errors
 
     mapped_ids = set(scenarios.get("skills", {}))
+    if scenarios.get("fixture_id") != "xiaoyue":
+        errors.append("内置演练 fixture_id 必须为 xiaoyue")
+    if scenarios.get("fixture_name") != "小月":
+        errors.append("内置演练显示名必须为小月")
     if mapped_ids != queue_ids:
         errors.append("内置场景与 32 个操盘手文案 Skill 不一致")
     for skill_id, scenario in scenarios.get("skills", {}).items():

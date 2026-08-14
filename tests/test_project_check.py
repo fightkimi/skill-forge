@@ -11,6 +11,21 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / ".agents/skills/clipmind-skill-tuner/scripts"
 SCRIPT = SCRIPTS / "project_check.py"
+FIXTURE = ROOT / "fixtures/ip/小月"
+MIN_FIXTURE_CHARACTERS = {
+    "README.md": 1500,
+    "MATERIALS.md": 1800,
+    "PROFILE.md": 3500,
+    "EVIDENCE-INDEX.md": 3500,
+    "原始材料/01-人物访谈.md": 3000,
+    "原始材料/02-业务与产品.md": 3500,
+    "原始材料/03-用户访谈与评论.md": 3500,
+    "原始材料/04-案例记录.md": 4500,
+    "原始材料/05-表达语料.md": 3500,
+    "原始材料/06-历史内容样本.md": 5000,
+    "原始材料/07-内容表现数据.md": 3500,
+    "原始材料/08-阶段目标与选题池.md": 4000,
+}
 
 
 class ProjectCheckTest(unittest.TestCase):
@@ -25,7 +40,8 @@ class ProjectCheckTest(unittest.TestCase):
         }
         for name, text in docs.items():
             self.assertIn("32", text, name)
-            self.assertIn("赵玥玥", text, name)
+            self.assertIn("小月", text, name)
+            self.assertNotIn("赵玥玥", text, name)
         self.assertIn("scenarios.json", docs["tuner"])
         self.assertIn("同一任务和材料", docs["tuner"])
         self.assertNotIn("88 个内容 Skill", docs["README.md"])
@@ -47,10 +63,10 @@ class ProjectCheckTest(unittest.TestCase):
             with tempfile.TemporaryDirectory(prefix="skill-fixture-check-") as temp:
                 temp_root = Path(temp)
                 shutil.copytree(
-                    ROOT / "fixtures/ip/赵玥玥",
-                    temp_root / "fixtures/ip/赵玥玥",
+                    FIXTURE,
+                    temp_root / "fixtures/ip/小月",
                 )
-                (temp_root / "fixtures/ip/赵玥玥/scenarios.json").unlink()
+                (temp_root / "fixtures/ip/小月/scenarios.json").unlink()
                 errors = module.check_builtin_fixture(temp_root, {"skill-a"})
                 self.assertTrue(any("scenarios.json" in error for error in errors), errors)
         finally:
@@ -85,41 +101,30 @@ class ProjectCheckTest(unittest.TestCase):
             sys.path.remove(str(SCRIPTS))
 
     def test_builtin_fixture_is_complete_synthetic_and_mapped_to_queue(self):
-        fixture = ROOT / "fixtures/ip/赵玥玥"
-        required_markdown = [
-            "README.md",
-            "MATERIALS.md",
-            "PROFILE.md",
-            "EVIDENCE-INDEX.md",
-            "原始材料/01-人物访谈.md",
-            "原始材料/02-业务与产品.md",
-            "原始材料/03-用户访谈与评论.md",
-            "原始材料/04-案例记录.md",
-            "原始材料/05-表达语料.md",
-            "原始材料/06-历史内容样本.md",
-            "原始材料/07-内容表现数据.md",
-            "原始材料/08-阶段目标与选题池.md",
-        ]
-        for relative in required_markdown:
-            path = fixture / relative
+        for relative, minimum in MIN_FIXTURE_CHARACTERS.items():
+            path = FIXTURE / relative
             self.assertTrue(path.exists(), relative)
-            opening = "\n".join(path.read_text(encoding="utf-8").splitlines()[:4])
+            text = path.read_text(encoding="utf-8")
+            opening = "\n".join(text.splitlines()[:4])
             self.assertIn("MOCK 合成演练数据", opening, relative)
+            self.assertIn("小月", text, relative)
+            self.assertGreaterEqual(len(text.strip()), minimum, relative)
 
-        scenarios_path = fixture / "scenarios.json"
+        scenarios_path = FIXTURE / "scenarios.json"
         self.assertTrue(scenarios_path.exists())
         scenarios = json.loads(scenarios_path.read_text(encoding="utf-8"))
         queue = json.loads(
             (ROOT / "inventory/tuning-order.json").read_text(encoding="utf-8")
         )
         queue_ids = {item["skill_id"] for item in queue["skills"]}
-        self.assertEqual("zhao-yueyue", scenarios["fixture_id"])
+        self.assertEqual("xiaoyue", scenarios["fixture_id"])
+        self.assertEqual("小月", scenarios["fixture_name"])
         self.assertEqual(queue_ids, set(scenarios["skills"]))
         for skill_id, scenario in scenarios["skills"].items():
             self.assertTrue(scenario["task"].strip(), skill_id)
             self.assertTrue(scenario["materials"], skill_id)
             for relative in scenario["materials"]:
-                self.assertTrue((fixture / relative).exists(), f"{skill_id}: {relative}")
+                self.assertTrue((FIXTURE / relative).exists(), f"{skill_id}: {relative}")
 
     def test_operator_queue_contains_only_approved_copy_skills(self):
         data = json.loads(

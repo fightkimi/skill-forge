@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import sys
@@ -12,9 +13,39 @@ from pathlib import Path
 from typing import Any, Optional
 
 
-BUILTIN_FIXTURE_ID = "zhao-yueyue"
-BUILTIN_FIXTURE_DIR = Path("fixtures/ip/赵玥玥")
+BUILTIN_FIXTURE_ID = "xiaoyue"
+BUILTIN_FIXTURE_DIR = Path("fixtures/ip/小月")
+CURRENT_PROFILE_HEADING = "# 小月 IP 档案"
+LEGACY_PROFILE_HEADING = "# 赵玥玥 IP 档案"
 PROFILE_FILES = ("PROFILE.md", "MATERIALS.md", "EVIDENCE-INDEX.md")
+RAW_MATERIAL_FILES = (
+    "01-人物访谈.md",
+    "02-业务与产品.md",
+    "03-用户访谈与评论.md",
+    "04-案例记录.md",
+    "05-表达语料.md",
+    "06-历史内容样本.md",
+    "07-内容表现数据.md",
+    "08-阶段目标与选题池.md",
+)
+LEGACY_FIXTURE_SHA256 = {
+    "PROFILE.md": "18b1fc4fa5dea41af7dd155d8e7b3d5489ca1eda5470c8e5ebe141f1d8d9b48e",
+    "MATERIALS.md": "71e5d459a04186e23ccb3175a81ef5156cb939e74e73b7790d5df48b9e119c27",
+    "EVIDENCE-INDEX.md": "b7290078595e13727368cff911d6a469f34c5c065c9b09103e7bf3e7872871ca",
+    "原始材料/01-人物访谈.md": "1e0819f2ea5e8581e50c492c585962984c0dd523bc39b94fb004be45b6d7113e",
+    "原始材料/02-业务与产品.md": "5ce03bfca3304a7763a7a84a1f83fbe3628a7f5aea600234ce9d79a82cdebd69",
+    "原始材料/03-用户访谈与评论.md": "932486cee644a6520faab9ae8e64150f094326b9a8a5ab22cdba5793a1dbb2ca",
+    "原始材料/04-案例记录.md": "ada0afd8dbda430cbce87e2bf3a61b4c80bdcd306a8a3ce8e95e3d9864e25840",
+    "原始材料/05-表达语料.md": "2e78c6ef01a807952bba30db3fb171ec79374bf69337ad5ad6a7232b6c24b133",
+    "原始材料/06-历史内容样本.md": "e44dbdf06bdaba43670b44aaa6ecb37a2e32f7be7e9809ef2eb678cf4c226328",
+    "原始材料/07-内容表现数据.md": "b004941aa5adab4785ec6465a1de08432af574afa20a2966106574289c8e5e03",
+    "原始材料/08-阶段目标与选题池.md": "71ac1ce91456afd8c880f1da3d4d551bca3a31096913bfddc613b5aa5b55bf6e",
+}
+LEGACY_FIXTURE_SHA256_ALIASES = {
+    "原始材料/06-历史内容样本.md": {
+        "7d795bdba70e03bdff18799d59e01b8456592772e178e11e6781c54118d39e43",
+    },
+}
 
 
 def now() -> str:
@@ -36,23 +67,82 @@ def material_library_has_user_content(root: Path) -> bool:
     return any(path.name != ".gitkeep" for path in raw_materials.iterdir())
 
 
-def seed_builtin_fixture(root: Path) -> bool:
+def material_library_matches_builtin(root: Path, profile_heading: str) -> bool:
+    library = root / "IP素材库"
+    profile = library / "PROFILE.md"
+    raw_materials = library / "原始材料"
+    if not profile.exists() or not raw_materials.exists():
+        return False
+    profile_text = profile.read_text(encoding="utf-8")
+    if not profile_text.startswith(profile_heading):
+        return False
+    if "MOCK 合成演练数据" not in "\n".join(profile_text.splitlines()[:4]):
+        return False
+    if not all((library / name).exists() for name in PROFILE_FILES):
+        return False
+    raw_names = {
+        path.name
+        for path in raw_materials.iterdir()
+        if path.is_file() and path.name != ".gitkeep"
+    }
+    return raw_names == set(RAW_MATERIAL_FILES)
+
+
+def material_library_matches_legacy(root: Path) -> bool:
+    library = root / "IP素材库"
+    profile = library / "PROFILE.md"
+    raw_materials = library / "原始材料"
+    if not profile.exists() or not raw_materials.exists():
+        return False
+    profile_text = profile.read_text(encoding="utf-8")
+    if not profile_text.startswith(LEGACY_PROFILE_HEADING):
+        return False
+    if "MOCK 合成演练数据" not in "\n".join(profile_text.splitlines()[:4]):
+        return False
+    if not all((library / name).exists() for name in PROFILE_FILES):
+        return False
+    raw_names = {
+        path.name
+        for path in raw_materials.iterdir()
+        if path.is_file() and path.name != ".gitkeep"
+    }
+    if not raw_names.issubset(set(RAW_MATERIAL_FILES)):
+        return False
+    existing = list(PROFILE_FILES) + [
+        f"原始材料/{name}" for name in sorted(raw_names)
+    ]
+    for relative in existing:
+        actual = hashlib.sha256((library / relative).read_bytes()).hexdigest()
+        expected = LEGACY_FIXTURE_SHA256[relative]
+        aliases = LEGACY_FIXTURE_SHA256_ALIASES.get(relative, set())
+        if actual != expected and actual not in aliases:
+            return False
+    return True
+
+
+def seed_builtin_fixture(root: Path, replace_legacy: bool = False) -> bool:
     fixture = root / BUILTIN_FIXTURE_DIR
     library = root / "IP素材库"
     if material_library_has_user_content(root):
-        return False
+        if not (
+            replace_legacy
+            and material_library_matches_legacy(root)
+        ):
+            return False
     missing = [name for name in PROFILE_FILES if not (fixture / name).exists()]
-    if missing or not (fixture / "原始材料").exists():
-        raise FileNotFoundError(f"内置赵玥玥演练资料不完整：{', '.join(missing) or '原始材料'}")
+    raw_source = fixture / "原始材料"
+    missing_raw = [name for name in RAW_MATERIAL_FILES if not (raw_source / name).exists()]
+    if missing or missing_raw:
+        incomplete = missing + missing_raw
+        raise FileNotFoundError(f"内置小月演练资料不完整：{', '.join(incomplete)}")
 
     library.mkdir(parents=True, exist_ok=True)
     raw_target = library / "原始材料"
     raw_target.mkdir(parents=True, exist_ok=True)
     for name in PROFILE_FILES:
         shutil.copy2(fixture / name, library / name)
-    for source in (fixture / "原始材料").iterdir():
-        if source.is_file():
-            shutil.copy2(source, raw_target / source.name)
+    for name in RAW_MATERIAL_FILES:
+        shutil.copy2(raw_source / name, raw_target / name)
     return True
 
 
@@ -92,10 +182,23 @@ def load_or_initialize(
     reconcile_state(state, order)
     state.setdefault("profile_mode", "unconfigured")
     state.setdefault("active_ip_fixture", None)
-    if project_root is not None and seed_builtin_fixture(project_root):
-        state["ip_profile_status"] = "ready"
-        state["profile_mode"] = "builtin_fixture"
-        state["active_ip_fixture"] = BUILTIN_FIXTURE_ID
+    if project_root is not None:
+        legacy_builtin = material_library_matches_legacy(project_root)
+        seeded = seed_builtin_fixture(
+            project_root,
+            replace_legacy=legacy_builtin,
+        )
+        current_builtin = material_library_matches_builtin(
+            project_root,
+            CURRENT_PROFILE_HEADING,
+        )
+        if seeded or current_builtin:
+            state["ip_profile_status"] = "ready"
+            state["profile_mode"] = "builtin_fixture"
+            state["active_ip_fixture"] = BUILTIN_FIXTURE_ID
+        elif legacy_builtin:
+            state["profile_mode"] = "user_material"
+            state["active_ip_fixture"] = None
     save_state(state_path, state)
     return state
 

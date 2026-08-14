@@ -1,10 +1,10 @@
 {
-  "fixture_id": "zhao-yueyue",
-  "fixture_name": "赵玥玥",
+  "fixture_id": "xiaoyue",
+  "fixture_name": "小月",
   "data_classification": "MOCK_SYNTHETIC_ONLY",
   "skills": {
     "clipmind-sop-ip-s01-profile-extract": {
-      "task": "基于建档材料提炼赵玥玥的 8 个核心档案维度候选，逐项标明证据和待确认项。",
+      "task": "基于建档材料提炼小月的 8 个核心档案维度候选，逐项标明证据和待确认项。",
       "materials": [
         "EVIDENCE-INDEX.md",
         "原始材料/01-人物访谈.md",
@@ -13,7 +13,7 @@
       ]
     },
     "clipmind-sop-ip-s01-profile-extract-aux": {
-      "task": "从案例、历史内容和表现材料中提炼可补充进入赵玥玥档案的信息，并识别冲突。",
+      "task": "从案例、历史内容和表现材料中提炼可补充进入小月档案的信息，并识别冲突。",
       "materials": [
         "EVIDENCE-INDEX.md",
         "原始材料/04-案例记录.md",
@@ -22,7 +22,7 @@
       ]
     },
     "clipmind-sop-ip-s01-profile-draft": {
-      "task": "生成一版可供人工确认的赵玥玥 IP 档案草稿，避免把弱证据写成确定事实。",
+      "task": "生成一版可供人工确认的小月 IP 档案草稿，避免把弱证据写成确定事实。",
       "materials": [
         "PROFILE.md",
         "EVIDENCE-INDEX.md",
@@ -31,7 +31,7 @@
       ]
     },
     "clipmind-sop-ip-s01-5-ip-breakdown": {
-      "task": "按经历、结果、代价、判断、方法、案例、性格、稀缺性拆解赵玥玥的内容资产。",
+      "task": "按经历、结果、代价、判断、方法、案例、性格、稀缺性拆解小月的内容资产。",
       "materials": [
         "PROFILE.md",
         "EVIDENCE-INDEX.md",
@@ -40,7 +40,7 @@
       ]
     },
     "clipmind-sop-ip-s02-diagnosis": {
-      "task": "诊断赵玥玥当前从定制操盘转向方法产品时的业务阶段、核心卡点和定位问题。",
+      "task": "诊断小月当前从定制操盘转向方法产品时的业务阶段、核心卡点和定位问题。",
       "materials": [
         "PROFILE.md",
         "原始材料/02-业务与产品.md",
@@ -49,7 +49,7 @@
       ]
     },
     "clipmind-sop-ip-s-language-extract": {
-      "task": "提炼赵玥玥可复用的语气、句式、常用词、禁用表达和自然口播示例。",
+      "task": "提炼小月可复用的语气、句式、常用词、禁用表达和自然口播示例。",
       "materials": [
         "PROFILE.md",
         "原始材料/01-人物访谈.md",
@@ -58,7 +58,7 @@
       ]
     },
     "clipmind-sop-ip-s03-stage-advice": {
-      "task": "判断赵玥玥当前 IP 阶段，给出六周阶段目标和最小下一步建议。",
+      "task": "判断小月当前 IP 阶段，给出六周阶段目标和最小下一步建议。",
       "materials": [
         "PROFILE.md",
         "原始材料/02-业务与产品.md",
@@ -67,7 +67,7 @@
       ]
     },
     "clipmind-sop-ip-s03-strategy-suggestion": {
-      "task": "为赵玥玥制定本轮内容策略，说明核心主张、信任理由、差异化打法和风险边界。",
+      "task": "为小月制定本轮内容策略，说明核心主张、信任理由、差异化打法和风险边界。",
       "materials": [
         "PROFILE.md",
         "EVIDENCE-INDEX.md",
@@ -93,7 +93,7 @@
       ]
     },
     "clipmind-agent-user-persona-analysis": {
-      "task": "从用户访谈、评论和业务边界中整理赵玥玥当前最值得服务的用户画像与待验证问题。",
+      "task": "从用户访谈、评论和业务边界中整理小月当前最值得服务的用户画像与待验证问题。",
       "materials": [
         "原始材料/02-业务与产品.md",
         "原始材料/03-用户访谈与评论.md",
@@ -132,7 +132,7 @@
       ]
     },
     "clipmind-agent-content-matrix-planner": {
-      "task": "为赵玥玥规划主账号的栏目分层与内容角色，不扩张到当前产能无法承受的矩阵账号。",
+      "task": "为小月规划主账号的栏目分层与内容角色，不扩张到当前产能无法承受的矩阵账号。",
       "materials": [
         "PROFILE.md",
         "原始材料/02-业务与产品.md",
@@ -140,7 +140,7 @@
       ]
     },
     "clipmind-agent-content-gap-analysis": {
-      "task": "对照用户问题、历史内容和阶段目标，找出赵玥玥当前内容体系的主题与证据缺口。",
+      "task": "对照用户问题、历史内容和阶段目标，找出小月当前内容体系的主题与证据缺口。",
       "materials": [
         "原始材料/03-用户访谈与评论.md",
         "原始材料/06-历史内容样本.md",
@@ -176,7 +176,7 @@
       ]
     },
     "clipmind-agent-xhs-strategy": {
-      "task": "为赵玥玥制定六周小红书内容策略，聚焦栏目、选题结构和信任推进，不涉及视觉调优。",
+      "task": "为小月制定六周小红书内容策略，聚焦栏目、选题结构和信任推进，不涉及视觉调优。",
       "materials": [
         "PROFILE.md",
         "原始材料/02-业务与产品.md",
@@ -212,7 +212,7 @@
       ]
     },
     "clipmind-agent-short-video-strategy": {
-      "task": "为赵玥玥设计六周短视频内容打法，匹配每周三条短内容的真实产能。",
+      "task": "为小月设计六周短视频内容打法，匹配每周三条短内容的真实产能。",
       "materials": [
         "PROFILE.md",
         "原始材料/02-业务与产品.md",
@@ -221,7 +221,7 @@
       ]
     },
     "clipmind-agent-script-polish": {
-      "task": "把历史样本 S05 的慢开头改成赵玥玥能自然说出口的开场，并保留修改说明。",
+      "task": "把历史样本 S05 的慢开头改成小月能自然说出口的开场，并保留修改说明。",
       "materials": [
         "PROFILE.md",
         "原始材料/05-表达语料.md",
@@ -246,7 +246,7 @@
       ]
     },
     "clipmind-agent-content-rewrite-polish": {
-      "task": "改写历史样本 S03，使它具体、自然、有赵玥玥的判断，同时不补造案例。",
+      "task": "改写历史样本 S03，使它具体、自然、有小月的判断，同时不补造案例。",
       "materials": [
         "PROFILE.md",
         "原始材料/05-表达语料.md",
@@ -263,7 +263,7 @@
       ]
     },
     "clipmind-agent-opening-hook-analysis": {
-      "task": "分析历史样本 S05 为什么开头太慢，并给出三个符合赵玥玥风格的替代钩子。",
+      "task": "分析历史样本 S05 为什么开头太慢，并给出三个符合小月风格的替代钩子。",
       "materials": [
         "PROFILE.md",
         "原始材料/03-用户访谈与评论.md",

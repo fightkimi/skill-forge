@@ -1,12 +1,12 @@
 # Skill Forge 工作规则
 
-本项目只用于内置“赵玥玥”MOCK IP 上下文下的 32 个纯文案 Skill 受控调试，不是 ClipMind 工程。
+本项目只用于内置“小月”MOCK IP 上下文下的 32 个纯文案 Skill 受控调试，不是 ClipMind 工程。
 
 ## 每次对话必须执行
 
 1. 完整读取 `.agents/skills/clipmind-skill-tuner/SKILL.md` 并按其流程工作。
-2. 读取 `Skill不可修改边界.md`、`inventory/tuning-order.json`、`fixtures/ip/赵玥玥/scenarios.json` 和本地进度 `.skill-forge/progress.json`；进度不存在时由脚本初始化。
-3. 素材库为空时由 `progress.py init` 自动装载赵玥玥 MOCK 资料。只读取当前场景列出的材料，不得混入其他客户、旧对话、互联网或模型记忆中的事实。业务 Skill 内旧路径 `ip-cases/<案例编号>/` 在本项目中统一解释为根目录 `IP素材库/`。
+2. 读取 `Skill不可修改边界.md`、`inventory/tuning-order.json`、`fixtures/ip/小月/scenarios.json` 和本地进度 `.skill-forge/progress.json`；进度不存在时由脚本初始化。
+3. 素材库为空时由 `progress.py init` 自动装载小月 MOCK 资料。只读取当前场景列出的材料，不得混入其他客户、旧对话、互联网或模型记忆中的事实。业务 Skill 内旧路径 `ip-cases/<案例编号>/` 在本项目中统一解释为根目录 `IP素材库/`。
 4. 一次只打开、运行和修改一个 `skills/<技术ID>/`；已有进行中的 Skill 时不得切换。
 5. 原始材料和 `references/original.md` 只读。
 

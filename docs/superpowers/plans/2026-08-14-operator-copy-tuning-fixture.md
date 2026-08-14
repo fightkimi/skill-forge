@@ -4,7 +4,7 @@
 
 **Goal:** Restrict the operator workflow to 32 copy-related Skills, seed a synthetic Zhao Yueyue IP fixture automatically, and prevent any tuned package from changing its baseline or critical contract.
 
-**Architecture:** Keep all 146 exported transport Skills intact, but turn `inventory/tuning-order.json` into the only operator queue. Store the synthetic fixture and per-Skill scenarios under `fixtures/ip/赵玥玥/`, seed it only into an empty ignored `IP素材库/`, and enforce queue membership plus baseline hashes in the existing guard/finalizer.
+**Architecture:** Keep all 146 exported transport Skills intact, but turn `inventory/tuning-order.json` into the only operator queue. Store the synthetic fixture and per-Skill scenarios under `fixtures/ip/小月/`, seed it only into an empty ignored `IP素材库/`, and enforce queue membership plus baseline hashes in the existing guard/finalizer.
 
 **Tech Stack:** Python 3 standard library, JSON, Markdown, `unittest`.
 
@@ -68,19 +68,19 @@ Expected: PASS for the queue assertions or continue to the next missing fixture 
 ### Task 2: Add the versioned synthetic IP fixture and scenarios
 
 **Files:**
-- Create: `fixtures/ip/赵玥玥/README.md`
-- Create: `fixtures/ip/赵玥玥/MATERIALS.md`
-- Create: `fixtures/ip/赵玥玥/PROFILE.md`
-- Create: `fixtures/ip/赵玥玥/EVIDENCE-INDEX.md`
-- Create: `fixtures/ip/赵玥玥/原始材料/01-人物访谈.md`
-- Create: `fixtures/ip/赵玥玥/原始材料/02-业务与产品.md`
-- Create: `fixtures/ip/赵玥玥/原始材料/03-用户访谈与评论.md`
-- Create: `fixtures/ip/赵玥玥/原始材料/04-案例记录.md`
-- Create: `fixtures/ip/赵玥玥/原始材料/05-表达语料.md`
-- Create: `fixtures/ip/赵玥玥/原始材料/06-历史内容样本.md`
-- Create: `fixtures/ip/赵玥玥/原始材料/07-内容表现数据.md`
-- Create: `fixtures/ip/赵玥玥/原始材料/08-阶段目标与选题池.md`
-- Create: `fixtures/ip/赵玥玥/scenarios.json`
+- Create: `fixtures/ip/小月/README.md`
+- Create: `fixtures/ip/小月/MATERIALS.md`
+- Create: `fixtures/ip/小月/PROFILE.md`
+- Create: `fixtures/ip/小月/EVIDENCE-INDEX.md`
+- Create: `fixtures/ip/小月/原始材料/01-人物访谈.md`
+- Create: `fixtures/ip/小月/原始材料/02-业务与产品.md`
+- Create: `fixtures/ip/小月/原始材料/03-用户访谈与评论.md`
+- Create: `fixtures/ip/小月/原始材料/04-案例记录.md`
+- Create: `fixtures/ip/小月/原始材料/05-表达语料.md`
+- Create: `fixtures/ip/小月/原始材料/06-历史内容样本.md`
+- Create: `fixtures/ip/小月/原始材料/07-内容表现数据.md`
+- Create: `fixtures/ip/小月/原始材料/08-阶段目标与选题池.md`
+- Create: `fixtures/ip/小月/scenarios.json`
 - Modify: `tests/test_project_check.py`
 - Modify: `.agents/skills/clipmind-skill-tuner/scripts/project_check.py`
 
@@ -102,7 +102,7 @@ for scenario in scenarios["skills"].values():
 
 Run: `python3 -m unittest tests.test_project_check -v`
 
-Expected: FAIL because `fixtures/ip/赵玥玥` does not exist.
+Expected: FAIL because `fixtures/ip/小月` does not exist.
 
 - [ ] **Step 3: Add rich, explicitly synthetic fixture materials**
 
@@ -120,10 +120,10 @@ Use stable evidence IDs across the profile and raw materials. Include contradict
 
 ```json
 {
-  "fixture_id": "zhao-yueyue",
+  "fixture_id": "xiaoyue",
   "skills": {
     "clipmind-sop-ip-s01-profile-extract": {
-      "task": "基于全部建档资料提炼赵玥玥的 8 个档案维度候选。",
+      "task": "基于全部建档资料提炼小月的 8 个档案维度候选。",
       "materials": ["PROFILE.md", "EVIDENCE-INDEX.md", "原始材料/01-人物访谈.md"]
     }
   }
@@ -161,7 +161,7 @@ Add a state test showing built-in seeding produces:
 ```python
 self.assertEqual("ready", state["ip_profile_status"])
 self.assertEqual("builtin_fixture", state["profile_mode"])
-self.assertEqual("zhao-yueyue", state["active_ip_fixture"])
+self.assertEqual("xiaoyue", state["active_ip_fixture"])
 ```
 
 - [ ] **Step 2: Run progress tests and verify RED**

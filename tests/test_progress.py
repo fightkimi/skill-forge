@@ -1,14 +1,17 @@
 import importlib.util
+import hashlib
 import inspect
 import json
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / ".agents/skills/clipmind-skill-tuner/scripts/progress.py"
+FIXTURE = ROOT / "fixtures/ip/小月"
 
 
 def load_progress_module():
@@ -38,8 +41,8 @@ class ProgressTest(unittest.TestCase):
     def make_project_root(self) -> Path:
         project_root = Path(self.temp_dir.name) / "project"
         shutil.copytree(
-            ROOT / "fixtures/ip/赵玥玥",
-            project_root / "fixtures/ip/赵玥玥",
+            FIXTURE,
+            project_root / "fixtures/ip/小月",
         )
         (project_root / "IP素材库/原始材料").mkdir(parents=True)
         return project_root
@@ -52,7 +55,7 @@ class ProgressTest(unittest.TestCase):
 
         self.assertTrue(seeded)
         for relative in ("PROFILE.md", "MATERIALS.md", "EVIDENCE-INDEX.md"):
-            expected = (project_root / "fixtures/ip/赵玥玥" / relative).read_text(
+            expected = (project_root / "fixtures/ip/小月" / relative).read_text(
                 encoding="utf-8"
             )
             actual = (project_root / "IP素材库" / relative).read_text(encoding="utf-8")
@@ -87,7 +90,52 @@ class ProgressTest(unittest.TestCase):
 
         self.assertEqual("ready", state["ip_profile_status"])
         self.assertEqual("builtin_fixture", state["profile_mode"])
-        self.assertEqual("zhao-yueyue", state["active_ip_fixture"])
+        self.assertEqual("xiaoyue", state["active_ip_fixture"])
+
+    def test_migrates_recognized_legacy_builtin_fixture(self):
+        project_root = self.make_project_root()
+        library = project_root / "IP素材库"
+        (library / "PROFILE.md").write_text(
+            "# 赵玥玥 IP 档案\n\n> **MOCK 合成演练数据**：旧内置资料。",
+            encoding="utf-8",
+        )
+        (library / "MATERIALS.md").write_text("旧内置资料", encoding="utf-8")
+        (library / "EVIDENCE-INDEX.md").write_text("旧内置资料", encoding="utf-8")
+        legacy_hashes = {
+            relative: hashlib.sha256((library / relative).read_bytes()).hexdigest()
+            for relative in ("PROFILE.md", "MATERIALS.md", "EVIDENCE-INDEX.md")
+        }
+        self.state_path.write_text(
+            json.dumps(
+                {
+                    "version": 2,
+                    "ip_profile_status": "ready",
+                    "profile_mode": "builtin_fixture",
+                    "active_ip_fixture": "zhao-yueyue",
+                    "active_skill": None,
+                    "skills": {},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+
+        with mock.patch.object(
+            self.progress,
+            "LEGACY_FIXTURE_SHA256",
+            legacy_hashes,
+        ):
+            state = self.progress.load_or_initialize(
+                self.state_path,
+                self.order,
+                project_root=project_root,
+            )
+
+        self.assertEqual("xiaoyue", state["active_ip_fixture"])
+        profile = (library / "PROFILE.md").read_text(encoding="utf-8")
+        self.assertIn("# 小月 IP 档案", profile)
+        self.assertNotIn("赵玥玥", profile)
+        self.assertTrue((library / "原始材料/08-阶段目标与选题池.md").exists())
 
     def test_existing_state_is_reconciled_to_current_queue(self):
         existing = {
